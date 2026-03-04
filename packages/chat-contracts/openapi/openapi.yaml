@@ -1,0 +1,217 @@
+openapi: 3.1.0
+info:
+  title: Chat Service API
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /chats:
+    post:
+      operationId: createChat
+      summary: Create chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /chats/{chatId}:
+    get:
+      operationId: getChatById
+      summary: Get chat by id
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    Id:
+      type: string
+      minLength: 1
+
+    IsoDateTime:
+      type: string
+      format: date-time
+
+    ChatStatus:
+      type: string
+      enum: [active, pending, completed, failed]
+
+    ChatUser:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+          minLength: 1
+
+    Chat:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - stateVersion
+        - buildId
+        - project
+        - user
+        - sessionIds
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        status:
+          $ref: '#/components/schemas/ChatStatus'
+          default: pending
+        stateVersion:
+          type: number
+          default: 0
+        buildId:
+          $ref: '#/components/schemas/Id'
+        project:
+          $ref: '#/components/schemas/Id'
+        user:
+          $ref: '#/components/schemas/ChatUser'
+        activeSessionId:
+          $ref: '#/components/schemas/Id'
+        activeInstanceQueue:
+          type: string
+          minLength: 1
+        sessionIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/Id'
+          default: []
+        errorMessage:
+          type: string
+          minLength: 1
+        createdAt:
+          $ref: '#/components/schemas/IsoDateTime'
+        updatedAt:
+          $ref: '#/components/schemas/IsoDateTime'
+
+    CreateChatRequest:
+      type: object
+      additionalProperties: false
+      required: [buildId, project, user]
+      properties:
+        buildId:
+          $ref: '#/components/schemas/Id'
+        project:
+          $ref: '#/components/schemas/Id'
+        user:
+          $ref: '#/components/schemas/ChatUser'
+        activeSessionId:
+          $ref: '#/components/schemas/Id'
+        activeInstanceQueue:
+          type: string
+          minLength: 1
+
+    ProblemDetails:
+      type: object
+      additionalProperties: false
+      required: [type, title, status, code, traceId]
+      properties:
+        type:
+          type: string
+          minLength: 1
+        title:
+          type: string
+          minLength: 1
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        code:
+          type: string
+          minLength: 1
+        traceId:
+          type: string
+          minLength: 1
+        meta:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
