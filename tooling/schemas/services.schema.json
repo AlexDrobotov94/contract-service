@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "services.schema.json",
+  "definitions": {
+    "serviceId": {
+      "type": "string",
+      "enum": ["chat-service", "bff-service", "user-service"]
+    },
+    "serviceRef": {
+      "type": "string",
+      "enum": [
+        "component:default/chat-service",
+        "component:default/bff-service",
+        "component:default/user-service"
+      ]
+    }
+  }
+}

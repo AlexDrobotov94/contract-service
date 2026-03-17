@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "service.schema.json",
+  "title": "Service Descriptor",
+  "description": "Схема метаданных сервиса для портала контрактов Kvint",
+  "type": "object",
+  "required": [
+    "apiVersion",
+    "kind",
+    "namespace",
+    "id",
+    "name",
+    "owner",
+    "lifecycle",
+    "system",
+    "domain",
+    "contracts"
+  ],
+  "additionalProperties": false,
+
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "enum": ["kvint/v1"],
+      "description": "Версия формата дескриптора. Используется порталом для выбора парсера."
+    },
+
+    "kind": {
+      "type": "string",
+      "enum": ["component"],
+      "description": "Тип сущности каталога. Сейчас поддерживается только component."
+    },
+
+    "namespace": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Пространство имён. Обычно default."
+    },
+
+    "id": {
+      "$ref": "services.schema.json#/definitions/serviceId",
+      "description": "Уникальный идентификатор сервиса. Должен быть зарегистрирован в services.schema.json."
+    },
+
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Человекочитаемое название сервиса."
+    },
+
+    "description": {
+      "type": "string",
+      "description": "Краткое описание назначения сервиса."
+    },
+
+    "owner": {
+      "type": "string",
+      "pattern": "^(group|user):([a-z][a-z0-9-]*)\\/([a-z][a-z0-9-]*)$",
+      "description": "Владелец в формате <kind>:<namespace>/<id>. Например: group:default/team-chat",
+      "examples": ["group:default/team-chat", "user:default/john-doe"]
+    },
+
+    "lifecycle": {
+      "type": "string",
+      "enum": ["experimental", "production", "deprecated"],
+      "description": "Стадия жизненного цикла сервиса."
+    },
+
+    "type": {
+      "type": "string",
+      "enum": ["service", "library", "website"],
+      "description": "Тип компонента. Для бэкенд-сервисов — service."
+    },
+
+    "system": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Логическая система или продукт. Например: voice-robots, payments."
+    },
+
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Доменная область внутри системы. Например: chat, billing, auth."
+    },
+
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-\\.]*$"
+      },
+      "uniqueItems": true,
+      "description": "Теги для фильтрации и поиска. Например: nestjs, rabbitmq, postgresql."
+    },
+
+    "links": {
+      "type": "array",
+      "description": "Ссылки на внешние ресурсы сервиса: GitLab, Grafana, Runbook и т.д.",
+      "items": {
+        "type": "object",
+        "required": ["url", "title"],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL ресурса."
+          },
+          "title": {
+            "type": "string",
+            "description": "Человекочитаемое название ссылки."
+          },
+          "icon": {
+            "type": "string",
+            "enum": ["gitlab", "dashboard", "docs", "runbook", "alert"],
+            "description": "Иконка для отображения в портале."
+          }
+        }
+      }
+    },
+
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Список контрактных файлов сервиса. Определяет какие вкладки показывать в портале.",
+      "items": {
+        "type": "object",
+        "required": ["protocol", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "protocol": {
+            "type": "string",
+            "enum": ["http", "queue", "socket", "grpc", "graphql"],
+            "description": "Тип протокола. Определяет UI-компонент для рендеринга (Scalar, AsyncAPI, etc.)."
+          },
+          "path": {
+            "type": "string",
+            "description": "Относительный путь к файлу контракта от корня пакета. Например: openapi/openapi.yaml"
+          },
+          "description": {
+            "type": "string",
+            "description": "Краткое описание этого контракта."
+          }
+        }
+      }
+    },
+
+    "dependsOn": {
+      "type": "array",
+      "description": "Явные зависимости от других сервисов.",
+      "items": {
+        "type": "object",
+        "required": ["service", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "service": {
+            "$ref": "services.schema.json#/definitions/serviceRef"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["http", "event", "queue", "socket"],
+            "description": "Тип зависимости: http — синхронный вызов, event/queue — асинхронный, socket — WebSocket."
+          },
+          "description": {
+            "type": "string",
+            "description": "Зачем этот сервис нужен — контекст для карты зависимостей."
+          }
+        }
+      }
+    }
+  }
+}

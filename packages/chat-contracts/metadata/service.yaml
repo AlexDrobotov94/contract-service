@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../../../tooling/schemas/service.schema.json
+
+apiVersion: kvint/v1
+kind: component
+namespace: default
+id: chat-service
+name: Chat Service
+description: |
+  Сервис тестирования голосовых роботов в текстовом формате.
+  Обеспечивает создание чат-сессий, отправку сообщений и асинхронную
+  обработку аудио через очереди.
+
+owner: group:default/team-chat
+lifecycle: production
+type: service
+
+system: voice-robots
+domain: chat
+
+links:
+  - url: https://gitlab.kvint.io/voice-robots/chat-service
+    title: GitLab
+    icon: gitlab
+  - url: https://grafana.kvint.io/d/chat
+    title: Grafana
+    icon: dashboard
+
+tags:
+  - nestjs
+  - rabbitmq
+  - socket.io
+  - mongodb
+
+contracts:
+  - protocol: http
+    path: openapi/openapi.yaml
+    description: REST API для управления сессиями и сообщениями
+  - protocol: queue
+    path: asyncapi/rabbitmq.yaml
+    description: Асинхронная обработка аудио через RabbitMQ
+  - protocol: socket
+    path: asyncapi/socket.yaml
+    description: Реалтайм-события чата через Socket.IO
+
+dependsOn:
+  - service: component:default/bff-service
+    type: http
+    description: BFF проксирует запросы к чату, управляет presigned URL MinIO
+  - service: component:default/user-service
+    type: http
+    description: Получение данных пользователя при создании сессии
