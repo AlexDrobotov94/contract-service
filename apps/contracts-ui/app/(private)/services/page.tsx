@@ -1,1 +1,1 @@
-export { ServicePage as default } from "@/pages/service-page";
+export { ServicesPage as default } from "@/pages/services-page";
