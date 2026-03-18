@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getService } from "@/entities/service";
+import { getService } from "@/entities/service/server";
 
 type Props = {
   serviceName: string;

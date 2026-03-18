@@ -3,4 +3,5 @@ export type {
   ServiceProtocol,
   ServiceLifecycle,
 } from "./model/types";
-export { getServices, getService } from "./api/get-services";
+export { LifecycleBadge } from "./ui/lifecycle-badge";
+export { ProtocolBadge } from "./ui/protocol-badge";
