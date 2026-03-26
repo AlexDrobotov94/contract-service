@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Alex24/.claude/plugins/**)",
+      "Read(//c/Users/Alex24/.claude/**)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''skills'''', d.get\\(''''plugins'''', {}\\)\\), indent=2\\)\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(list\\(d.keys\\(\\)\\), indent=2\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=2\\)\\)\")",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" remote show origin)",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" fetch origin)",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" checkout main)",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" pull origin main)",
+      "Bash(npm:*)",
+      "Bash(git:*)"
+    ]
+  }
+}
