@@ -12,7 +12,18 @@
       "Bash(git -C \"D:/kvint-for-contracts/chat-service\" pull origin main)",
       "Bash(npm:*)",
       "Bash(git:*)",
-      "Bash(find D:/kvint-for-contracts -maxdepth 4 -name package.json -not -path */node_modules/*)"
+      "Bash(find D:/kvint-for-contracts -maxdepth 4 -name package.json -not -path */node_modules/*)",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-1-only-required/with_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-1-only-required/without_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-2-full/with_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-2-full/without_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-3-no-path/with_skill/outputs\")",
+      "Bash(python -m scripts.aggregate_benchmark \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1\" --skill-name \"kvint-fill-service-yaml\")",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(where py:*)",
+      "Bash(py:*)",
+      "Bash(start:*)"
     ]
   }
 }

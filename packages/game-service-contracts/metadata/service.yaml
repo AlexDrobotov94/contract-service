@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=../../../tooling/schemas/service.schema.json
+
+apiVersion: kvint/v1
+kind: component
+namespace: default
+id: game-service
+name: Game Service
+description: |
+  Сервис с игрой крестики нолики
+
+owner: group:default/team-game
+lifecycle: experimental
+type: service
+
+system: game
+domain: gameplay
+
+tags: []
+
+links: []
+
+contracts:
+  - protocol: http
+    path: openapi/openapi.yaml
+    description: ""
+
+dependsOn: []

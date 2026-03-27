@@ -34,8 +34,6 @@ Also check `tooling/schemas/services.schema.json`. If `{slug}` is not yet in the
 
 ## Step 2: Create Files
 
-Create the following files exactly as specified.
-
 ### `packages/{slug}-contracts/package.json`
 
 ```json
@@ -51,44 +49,15 @@ Create the following files exactly as specified.
 
 `"contracts": true` is required — the portal discovers packages by this field.
 
-### `packages/{slug}-contracts/metadata/service.yaml`
-
-Follow ADR 002 exactly. The format is flat (no `metadata:` / `spec:` wrappers):
-
-```yaml
-# packages/{slug}-contracts/metadata/service.yaml
-apiVersion: kvint/v1
-kind: component
-namespace: default
-id: { slug }
-name: { Human Readable Name }
-
-owner: group:default/
-lifecycle: experimental
-type: service
-
-system: ""
-domain: ""
-
-tags: []
-
-links: []
-
-contracts:
-  - protocol: http
-    path: openapi/openapi.yaml
-
-dependsOn: []
-```
-
-Derive `name` from slug: `orders-service` → `Orders Service`.
-Leave `owner`, `system`, `domain` with empty placeholder values — the user will fill them in.
-
 ### `packages/{slug}-contracts/openapi/openapi.yaml`
 
 Create an empty file with no content.
 
 ### `packages/{slug}-contracts/asyncapi/`
+
+Create the directory only. Do not create any files inside it.
+
+### `packages/{slug}-contracts/metadata/`
 
 Create the directory only. Do not create any files inside it.
 
@@ -100,23 +69,18 @@ Create the directory only. Do not create any files inside it.
 ✅ Created packages/{slug}-contracts/
 
   package.json
-  metadata/service.yaml
+  metadata/              (empty directory)
   openapi/openapi.yaml   (empty)
   asyncapi/              (empty directory)
-
-⚠️  Fill in before committing:
-  metadata/service.yaml → owner, system, domain
-
-➡️  Next: /openapi-spec-generator packages/{slug}
 ```
 
 ---
 
 ## Rules
 
-- Never add fields to service.yaml that are not in ADR 002
-- Never use nested metadata:/spec: structure — the format is flat
+- Never create metadata/service.yaml — leave the directory empty
 - Never put any content in openapi/openapi.yaml — it must be empty
 - Never create files inside asyncapi/ — directory only
 - Never modify service.generated.ts automatically
 - Be deterministic: same slug → same files every time
+- Do not output any "next steps" or recommendations after the summary
