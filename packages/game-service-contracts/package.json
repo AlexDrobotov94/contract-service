@@ -1,8 +1,0 @@
-{
-  "name": "@kvint/game-service-contracts",
-  "version": "1.0.0",
-  "description": "Контракты game-service",
-  "private": true,
-  "contracts": true,
-  "license": "ISC"
-}

@@ -3,17 +3,14 @@
 apiVersion: kvint/v1
 kind: component
 namespace: default
-id: game-service
-name: Game Service
-description: |
-  Сервис с игрой крестики нолики
-
-owner: group:default/team-game
+id: chat-service-old
+name: Chat Service Old
+owner: group:default/team-chat
 lifecycle: experimental
 type: service
 
-system: game
-domain: gameplay
+system: chat
+domain: chat
 
 tags: []
 

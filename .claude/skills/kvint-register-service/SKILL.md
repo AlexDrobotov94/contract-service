@@ -26,62 +26,18 @@ Ask the user two questions (you can ask both at once):
 - Verify the folder exists. If it doesn't, tell the user and stop.
 - Verify it's a git repository (check for `.git` directory). If it isn't, tell the user and stop.
 
-### 3. Detect the default branch
+### 3. Scaffold the contract package
 
-Run:
-```bash
-git -C "<path>" remote show origin | grep "HEAD branch"
-```
+Invoke the `kvint-contract-scaffolder` subagent, passing the service name and resolved folder path as arguments. Wait for the subagent to complete before proceeding.
 
-Use the reported branch name (`main` or `master` or whatever it says). Fall back to `main` if the command fails.
+**Important:** do not answer any questions that the subagent asks the user. All clarifying questions from the subagent must be handled directly by the user — your role here is only to launch the subagent and wait for it to finish.
 
-### 4. Pull latest code
+### 4. Fill in service metadata
 
-```bash
-git -C "<path>" fetch origin
-git -C "<path>" checkout <default-branch>
-git -C "<path>" pull origin <default-branch>
-```
+After the scaffolder completes, invoke the `kvint-fill-service-yaml` skill to interactively fill in `metadata/service.yaml` for the newly created package.
 
-If the pull fails, report the error and stop — don't proceed to dependency installation on broken state.
+**Important:** do not answer any questions that the skill asks the user. All clarifying questions from the skill must be handled directly by the user — your role here is only to invoke the skill and wait for it to finish.
 
-### 5. Detect package manager and install dependencies
+## Rule: never answer on behalf of sub-agents or sub-skills
 
-Check for lock files in the service folder (in priority order):
-
-| Lock file | Package manager | Install command |
-|---|---|---|
-| `pnpm-lock.yaml` | pnpm | `pnpm install` |
-| `yarn.lock` | yarn | `yarn install` |
-| `package-lock.json` | npm | `npm install` |
-| `package.json` only | npm | `npm install` |
-
-If there is no `package.json`, skip this step and mention it.
-
-Run the install command with the working directory set to the service folder.
-
-### 6. Show last commit info
-
-Run:
-```bash
-git -C "<path>" log -1 --pretty=format:"%H%n%an <%ae>%n%ad%n%s%n%b" --date=format:"%Y-%m-%d %H:%M:%S"
-```
-
-Format the output clearly:
-
-```
-Service: <service-name>
-Path:    <resolved-path>
-
-Last commit
-───────────
-Hash:    <hash>
-Author:  <author name> <email>
-Date:    <date>
-Message: <subject>
-<body if present>
-```
-
-### 7. Done
-
-Confirm to the user that the service is ready. Mention the branch it's on and the package manager used.
+When you invoke any subagent or sub-skill as part of this registration flow, **do not intercept or answer their questions yourself**. If a subagent or skill asks the user something, stay silent and let the user respond directly. You are an orchestrator — your job is to pass control, wait, and proceed to the next step once the previous one is done.

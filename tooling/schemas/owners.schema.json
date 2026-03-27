@@ -8,7 +8,7 @@
     "owner": {
       "type": "string",
       "description": "Владелец в формате <kind>:<namespace>/<id>.",
-      "enum": ["group:default/team-chat", "group:default/team-game"]
+      "enum": ["group:default/team-chat"]
     }
   }
 }
