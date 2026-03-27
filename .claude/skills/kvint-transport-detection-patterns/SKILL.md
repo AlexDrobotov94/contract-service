@@ -121,3 +121,4 @@ Map each detected transport to its Kvint v1 `metadata/service.yaml` contract ent
 - If a package is in `devDependencies` only, it is not a runtime transport.
 - If `@nestjs/microservices` is present but no `Transport.*` is configured in bootstrap, there is no microservice transport active.
 - Read proto files to understand gRPC service contracts — don't summarize without reading.
+- **Skip generated/dependency directories**: never scan `dist/`, `.next/`, or `node_modules/` — they contain compiled output and third-party code, not the service's own source.
