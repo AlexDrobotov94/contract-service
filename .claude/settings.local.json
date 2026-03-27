@@ -23,7 +23,9 @@
       "Bash(where python3:*)",
       "Bash(where py:*)",
       "Bash(py:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(find /d/kvint-for-contracts/chat-service -name *.ts -not -path */node_modules/*)",
+      "Bash(xargs -I {} sh -c \"echo \"\"=== {} ===\"\" && head -50 \"\"{}\"\"\")"
     ]
   }
 }
