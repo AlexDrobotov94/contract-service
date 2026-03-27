@@ -1,0 +1,8 @@
+{
+  "name": "@kvint/payment-service-contracts",
+  "version": "1.0.0",
+  "description": "Контракты payment-service",
+  "private": true,
+  "contracts": true,
+  "license": "ISC"
+}

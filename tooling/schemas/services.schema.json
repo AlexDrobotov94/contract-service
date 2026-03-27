@@ -4,14 +4,15 @@
   "definitions": {
     "serviceId": {
       "type": "string",
-      "enum": ["chat-service", "bff-service", "user-service"]
+      "enum": ["chat-service", "bff-service", "user-service", "payment-service"]
     },
     "serviceRef": {
       "type": "string",
       "enum": [
         "component:default/chat-service",
         "component:default/bff-service",
-        "component:default/user-service"
+        "component:default/user-service",
+        "component:default/payment-service"
       ]
     }
   }
