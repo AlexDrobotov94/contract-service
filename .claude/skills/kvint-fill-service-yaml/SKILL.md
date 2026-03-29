@@ -1,16 +1,17 @@
 ---
 name: kvint-fill-service-yaml
 description: >
-  Use this skill to interactively create or fill in metadata/service.yaml for a Kvint monorepo
-  contract package. Trigger whenever the user asks to fill, generate, create, or write service.yaml,
-  service metadata, or service descriptor for a kvint contract package — even if they just say
-  "заполни метадату", "напиши service.yaml", "создай дескриптор сервиса" or pass a package path
+  Use this skill to interactively create or edit metadata/service.yaml for a Kvint monorepo
+  contract package. Trigger whenever the user asks to fill, generate, create, write, update, edit,
+  or modify service.yaml, service metadata, or service descriptor for a kvint contract package —
+  even if they just say "заполни метадату", "напиши service.yaml", "создай дескриптор сервиса",
+  "обнови service.yaml", "измени метадату", "отредактируй дескриптор" or pass a package path
   like "packages/orders-contracts". Also trigger when the user says /kvint-fill-service-yaml.
 ---
 
 # kvint-fill-service-yaml
 
-Интерактивно создаёт `metadata/service.yaml` для пакета контрактов монорепо Kvint.
+Интерактивно создаёт или редактирует `metadata/service.yaml` для пакета контрактов монорепо Kvint.
 
 ## Язык общения
 
@@ -25,6 +26,15 @@ description: >
 Иначе спроси: «Укажи путь к пакету контрактов (например: `packages/orders-contracts`)»
 
 Принимается относительный путь от корня монорепо или абсолютный.
+
+---
+
+## Шаг 1.5: Определить режим (создание или редактирование)
+
+Проверь, существует ли файл `{path}/metadata/service.yaml`.
+
+- **Если файл существует** → режим **редактирования**: прочитай его, извлеки текущие значения всех полей. На каждый вопрос далее показывай текущее значение и предлагай оставить его (Enter) или изменить. Например: `[текущее: "Orders Service"] — Enter чтобы оставить, или введи новое:`
+- **Если файла нет** → режим **создания**: задавай вопросы как обычно, без предзаполненных значений.
 
 ---
 
@@ -259,10 +269,10 @@ dependsOn:
 
 ## Шаг 7: Финальное сообщение
 
-Выведи краткое резюме:
+Выведи краткое резюме. Используй «Файл создан» в режиме создания или «Файл обновлён» в режиме редактирования:
 
 ```
-Файл создан: {path}/metadata/service.yaml
+Файл создан / Файл обновлён: {path}/metadata/service.yaml
 
 id:        {id}
 name:      {name}
