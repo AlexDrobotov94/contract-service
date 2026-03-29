@@ -202,3 +202,44 @@ contracts:
   - protocol: grpc
     path: grpc/orders.proto
 ```
+
+---
+
+## Output JSON shape (`endpoint` field)
+
+Each RPC method in the `.proto` file produces one `TransportEntry` with `endpoint.kind = "grpc"`. Источник истины — `.proto` файл, а не TypeScript-реализация.
+
+```json
+{
+  "contractType": "grpc",
+  "file": "src/proto/orders.proto",
+  "symbol": {
+    "kind": "method",
+    "name": "GetOrder",
+    "startLine": 6,
+    "endLine": 6
+  },
+  "evidence": {
+    "matchedPattern": "rpc GetOrder",
+    "snippet": "rpc GetOrder (GetOrderRequest) returns (OrderResponse);"
+  },
+  "endpoint": {
+    "kind": "grpc",
+    "serviceName": "OrdersService",
+    "methodName": "GetOrder",
+    "streaming": "unary",
+    "requestType": "GetOrderRequest",
+    "responseType": "OrderResponse",
+    "protoFile": "src/proto/orders.proto"
+  }
+}
+```
+
+**Правила заполнения `endpoint`:**
+- `streaming` — определяй по сигнатуре в `.proto`:
+  - `rpc M(Req) returns (Resp)` → `"unary"`
+  - `rpc M(Req) returns (stream Resp)` → `"server-streaming"`
+  - `rpc M(stream Req) returns (Resp)` → `"client-streaming"`
+  - `rpc M(stream Req) returns (stream Resp)` → `"bidirectional"`
+- `protoFile` — путь относительно `scannedDir`
+- `symbol.file` = путь к `.proto` файлу (не к TypeScript-реализации)

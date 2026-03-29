@@ -25,7 +25,11 @@
       "Bash(py:*)",
       "Bash(start:*)",
       "Bash(find /d/kvint-for-contracts/chat-service -name *.ts -not -path */node_modules/*)",
-      "Bash(xargs -I {} sh -c \"echo \"\"=== {} ===\"\" && head -50 \"\"{}\"\"\")"
+      "Bash(xargs -I {} sh -c \"echo \"\"=== {} ===\"\" && head -50 \"\"{}\"\"\")",
+      "Bash(grep -r .agent-workspace/transport-scan D:/kvint-for-contracts/contract-service/.claude --include=*.md)",
+      "Bash(grep -r transport-scan. D:/kvint-for-contracts/contract-service/.claude --include=*.md)",
+      "Bash(grep:*)",
+      "Bash(find D:/kvint-for-contracts/contract-service/.agent-workspace -name transport-scan*.json -type f)"
     ]
   }
 }

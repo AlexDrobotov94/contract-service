@@ -225,6 +225,49 @@ await producer.send({
 
 ---
 
+## Output JSON shape (`endpoint` field)
+
+Each message handler (one `@MessagePattern`, `@EventPattern`, `@RabbitSubscribe`, `@RabbitRPC`, or `@Process` method) produces one `TransportEntry` with `endpoint.kind = "messaging"`.
+
+```json
+{
+  "contractType": "asyncapi",
+  "file": "src/orders/orders.consumer.ts",
+  "symbol": {
+    "kind": "method",
+    "name": "handleOrderCreated",
+    "startLine": 18,
+    "endLine": 22
+  },
+  "evidence": {
+    "matchedPattern": "@EventPattern('order.created')",
+    "snippet": "@EventPattern('order.created')\nasync handleOrderCreated(@Payload() event: OrderCreatedEvent) {"
+  },
+  "endpoint": {
+    "kind": "messaging",
+    "technology": "rabbitmq",
+    "interaction": "event",
+    "pattern": "order.created",
+    "exchange": "orders",
+    "queue": "order-processor",
+    "payloadType": "OrderCreatedEvent"
+  }
+}
+```
+
+**Правила заполнения `endpoint`:**
+- `technology` — определяй из `Transport.*` в bootstrap или из библиотеки (`@golevelup/nestjs-rabbitmq` → `"rabbitmq"`, `kafkajs` → `"kafka"`, `Bull` / `BullMQ` → `"bull"`)
+- `interaction`:
+  - `@MessagePattern` / `@RabbitRPC` → `"request-reply"`
+  - `@EventPattern` / `@RabbitSubscribe` → `"event"`
+  - `@Process` (Bull) → `"job"`
+- `pattern` — строка паттерна из декоратора (`'order.created'`, `{ cmd: 'create_order' }` → записывай как строку `"create_order"`)
+- `exchange` — из `@RabbitSubscribe({ exchange })` или из `ClientsModule.register` конфигурации
+- `queue` — из `@RabbitSubscribe({ queue })` или из bootstrap options
+- `replyType` — тип возврата метода (только для `request-reply`)
+
+---
+
 ## Output Format
 
 For each detected messaging channel, record:

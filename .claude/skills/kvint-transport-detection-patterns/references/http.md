@@ -171,3 +171,45 @@ Accept: application/vnd.api+json;version=2
 | `routing-controllers`    | Express   | `@Controller`, `@Get`, `@Body`                  |
 
 If `@nestjs/swagger` decorators are present, they are the most reliable source of truth for schemas — prefer them over inferring from TypeScript types alone.
+
+---
+
+## Output JSON shape (`endpoint` field)
+
+Each HTTP route handler produces one `TransportEntry` with `endpoint.kind = "http"`.
+
+```json
+{
+  "contractType": "openapi",
+  "file": "src/users/users.controller.ts",
+  "symbol": {
+    "kind": "method",
+    "name": "getUser",
+    "startLine": 24,
+    "endLine": 28
+  },
+  "evidence": {
+    "matchedPattern": "@Get(':id')",
+    "snippet": "@Get(':id')\nasync getUser(@Param('id') id: string): Promise<UserDto> {"
+  },
+  "endpoint": {
+    "kind": "http",
+    "method": "GET",
+    "path": "/api/users/:id",
+    "pathParams": ["id"],
+    "queryParams": [],
+    "hasBody": false,
+    "responseType": "UserDto",
+    "auth": "JwtAuthGuard"
+  }
+}
+```
+
+**Правила заполнения `endpoint`:**
+- `path` — вычисляй как `globalPrefix + controllerPrefix + methodPath`. Пример: `setGlobalPrefix('api')` + `@Controller('users')` + `@Get(':id')` → `/api/users/:id`
+- `pathParams` — все `@Param('name')` аргументы метода; также извлекай из пути (`:id`, `:orderId`)
+- `queryParams` — все `@Query('name')` аргументы метода
+- `hasBody` — `true` если есть `@Body()` аргумент
+- `bodyType` — имя типа `@Body() dto: CreateUserDto` → `"CreateUserDto"`
+- `responseType` — возвращаемый тип метода (без `Promise<>` обёртки); если есть `@ApiOkResponse({ type: X })` — используй его
+- `auth` — имя guard из `@UseGuards(...)` на методе или контроллере; `"public"` если есть `@Public()`; `undefined` если неизвестно

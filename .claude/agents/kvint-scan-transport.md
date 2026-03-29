@@ -39,6 +39,23 @@ Find real transport registration calls. A package that is installed but not used
 
 Traverse files, using only the relevant sections of the skill for each transport type. For each discovered entry point, collect a `TransportEntry` according to the types defined in `tooling/types/transport-scan.ts`.
 
+**Гранулярность: одна `TransportEntry` = одна операция.** Не создавай одну запись на контроллер или класс-потребитель. Заполняй поле `endpoint` согласно типам из `tooling/types/transport-scan.ts`.
+
+| Транспорт | Единица записи | symbol.kind | Пример symbol.name |
+|-----------|---------------|-------------|---------------------|
+| HTTP | метод-обработчик (`@Get`, `@Post`, …) | `"method"` | `"getUser"` |
+| Messaging | метод с `@MessagePattern` / `@EventPattern` / `@RabbitSubscribe` / `@Process` | `"method"` | `"handleOrderCreated"` |
+| gRPC | RPC-метод из `.proto` файла | `"method"` | `"GetOrder"` |
+| GraphQL | resolver-метод (`@Query` / `@Mutation` / `@Subscription`) | `"method"` | `"createOrder"` |
+| WebSocket inbound | метод с `@SubscribeMessage` | `"method"` | `"handleCreateOrder"` |
+| WebSocket outbound | метод, где вызывается `server.emit()` / `client.emit()` | `"method"` | `"notifyOrderUpdated"` |
+
+**Специальные случаи:**
+- HTTP: если контроллер имеет 3 route-метода — создаётся 3 `TransportEntry`. Для каждого вычисляй полный путь: `globalPrefix + controllerPrefix + methodPath`.
+- WebSocket outbound: для каждого уникального события (`server.emit('eventName', ...)`) в методе — одна запись с `direction: "outbound"`.
+- gRPC: источник истины — `.proto` файл. `symbol.file` = путь к `.proto`, `symbol.name` = имя RPC-метода.
+- Если на одном методе несколько HTTP-декораторов (`@Get` + `@Post`) — создавай отдельную запись для каждого.
+
 **Rules:**
 
 - Never infer a transport's presence from an import alone — find real usage (handler registration, decorator, controller binding, listener, etc.)
@@ -59,6 +76,7 @@ where `createdAt` uses `-` instead of `:` (e.g. `2026-03-27T14-32-05Z`).
 
 - The `.agent-workspace/` directory already exists — write directly without checking
 - Validate JSON correctness before writing
+- **Never write `undefined` as a field value** — JSON does not support `undefined`. Omit optional fields (`auth`, `bodyType`, `responseType`, `exchange`, `queue`, `replyType`, `namespace`, `payloadType`, `ackType`, etc.) entirely when they have no value. Do not set them to `null` either unless the type explicitly allows it.
 - `byContractType` must contain only non-empty keys (omit keys with empty arrays)
 
 ---

@@ -274,3 +274,41 @@ contracts:
   - protocol: graphql
     path: graphql/schema.graphql
 ```
+
+---
+
+## Output JSON shape (`endpoint` field)
+
+Each resolver method (`@Query`, `@Mutation`, `@Subscription`) produces one `TransportEntry` with `endpoint.kind = "graphql"`.
+
+```json
+{
+  "contractType": "graphql",
+  "file": "src/orders/orders.resolver.ts",
+  "symbol": {
+    "kind": "method",
+    "name": "getOrder",
+    "startLine": 14,
+    "endLine": 18
+  },
+  "evidence": {
+    "matchedPattern": "@Query(() => Order)",
+    "snippet": "@Query(() => Order, { name: 'order', nullable: true })\nasync getOrder(@Args('id', { type: () => ID }) id: string): Promise<Order | null> {"
+  },
+  "endpoint": {
+    "kind": "graphql",
+    "operation": "query",
+    "name": "order",
+    "args": [
+      { "name": "id", "type": "ID", "nullable": false }
+    ],
+    "returnType": "Order"
+  }
+}
+```
+
+**Правила заполнения `endpoint`:**
+- `operation` — из декоратора: `@Query` → `"query"`, `@Mutation` → `"mutation"`, `@Subscription` → `"subscription"`
+- `name` — из `{ name: 'order' }` опции декоратора; если не задана — имя TypeScript-метода
+- `args` — каждый `@Args('name', { type, nullable })` аргумент; `nullable: true` если `{ nullable: true }` или тип опциональный
+- `returnType` — из декоратора `@Query(() => ReturnType)` или `@Mutation(() => ReturnType)`; для массивов: `"[Order!]!"`

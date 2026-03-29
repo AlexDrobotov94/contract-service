@@ -188,6 +188,17 @@ No separate `socket` entry is needed when WebSocket is solely used for GraphQL s
 
 ---
 
+## Определение библиотеки (`library`)
+
+| Сигнал | library |
+|--------|---------|
+| `socket.io` в зависимостях или `new Server()` из `socket.io` | `"socket.io"` |
+| `ws` в зависимостях и `new WebSocketServer()` из `ws` | `"ws"` |
+| NestJS `@WebSocketGateway` без явного адаптера | `"socket.io"` (NestJS default) |
+| NestJS `app.useWebSocketAdapter(new WsAdapter(app))` | `"ws"` |
+
+---
+
 ## Output Format
 
 ```
@@ -209,3 +220,71 @@ contracts:
   - protocol: socket
     path: asyncapi/socket.yaml
 ```
+
+---
+
+## Output JSON shape (`endpoint` field)
+
+Каждый `@SubscribeMessage` и каждый уникальный `server.emit()` / `client.emit()` в методе производят отдельный `TransportEntry` с `endpoint.kind = "websocket"`.
+
+**Inbound (client → server):**
+```json
+{
+  "contractType": "websocket",
+  "file": "src/orders/orders.gateway.ts",
+  "symbol": {
+    "kind": "method",
+    "name": "handleCreateOrder",
+    "startLine": 22,
+    "endLine": 28
+  },
+  "evidence": {
+    "matchedPattern": "@SubscribeMessage('createOrder')",
+    "snippet": "@SubscribeMessage('createOrder')\nasync handleCreateOrder(@MessageBody() dto: CreateOrderDto, @ConnectedSocket() client: Socket): Promise<OrderDto> {"
+  },
+  "endpoint": {
+    "kind": "websocket",
+    "library": "socket.io",
+    "event": "createOrder",
+    "direction": "inbound",
+    "namespace": "/orders",
+    "payloadType": "CreateOrderDto",
+    "ackType": "OrderDto"
+  }
+}
+```
+
+**Outbound (server → client):**
+```json
+{
+  "contractType": "websocket",
+  "file": "src/orders/orders.gateway.ts",
+  "symbol": {
+    "kind": "method",
+    "name": "notifyOrderUpdated",
+    "startLine": 32,
+    "endLine": 35
+  },
+  "evidence": {
+    "matchedPattern": "this.server.emit('orderUpdated'",
+    "snippet": "this.server.emit('orderUpdated', { orderId, status });"
+  },
+  "endpoint": {
+    "kind": "websocket",
+    "library": "socket.io",
+    "event": "orderUpdated",
+    "direction": "outbound",
+    "namespace": "/orders",
+    "payloadType": "{ orderId: string, status: OrderStatus }"
+  }
+}
+```
+
+**Правила заполнения `endpoint`:**
+- `library` — см. таблицу «Определение библиотеки» выше
+- `direction`:
+  - `@SubscribeMessage` / `socket.on` → `"inbound"`
+  - `server.emit()` / `io.emit()` / `client.emit()` / `socket.emit()` → `"outbound"`
+- `namespace` — из `@WebSocketGateway({ namespace: '/orders' })` или `io.of('/orders')`
+- `ackType` — тип возврата метода (для inbound с acknowledgement); у socket.io это `callback` в `socket.on`
+- Если `server.emit()` вызывается из нескольких методов с одинаковым именем события — создавай одну запись (по первому найденному)
