@@ -30,7 +30,9 @@
       "Bash(grep -r transport-scan. D:/kvint-for-contracts/contract-service/.claude --include=*.md)",
       "Bash(grep:*)",
       "Bash(find D:/kvint-for-contracts/contract-service/.agent-workspace -name transport-scan*.json -type f)",
-      "Bash(find D:/kvint-for-contracts/contract-service -name *orchestr* -o -name *runner*)"
+      "Bash(find D:/kvint-for-contracts/contract-service -name *orchestr* -o -name *runner*)",
+      "Bash(python3:*)",
+      "Bash(node:*)"
     ]
   }
 }
