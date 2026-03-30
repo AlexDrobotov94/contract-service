@@ -1,7 +1,7 @@
 ---
 name: kvint-openapi-controller-agent
-description: "Generates a partial OpenAPI 3.0 YAML fragment for a single controller/router based on pre-scanned TransportEntry data. Spawned in parallel by an orchestrator — one instance per controller file. Reads the controller source and referenced type/DTO files to produce accurate schemas. Output is a partial OpenAPI file (paths + components/schemas only, no info/servers) written to .agent-workspace/openapi-partials/."
-tools: Glob, Grep, Read, Write
+description: "Generator-style OpenAPI partial agent. Accepts a full TransportScanResult JSON and a contract package name. Finds the first unprocessed controller (no .yaml or .claim file exists), claims it, generates a partial OpenAPI 3.0 YAML (paths + components/schemas), and writes it to packages/{packageName}/openapi/partials/. When all controllers are done, creates a .complete sentinel file to signal the merge agent."
+tools: Glob, Grep, Read, Write, Bash
 model: sonnet
 color: blue
 ---
@@ -12,34 +12,68 @@ You are a code analysis agent. Your task is to generate a partial OpenAPI 3.0.3 
 
 ## Input
 
-`$ARGUMENTS` is a path to a JSON file. Read it — it contains:
+`$ARGUMENTS` contains two space-separated arguments:
+1. `<scan-json-path>` — path to the full `TransportScanResult` JSON file
+2. `<package-name>` — contract package name (e.g. `chat-contracts`)
 
+Example: `.agent-workspace/transport-scan.2026-03-29T12-00-00Z.json chat-contracts`
+
+The JSON file is a full `TransportScanResult`:
 ```ts
 {
+  createdAt: string;
   scannedDir: string;        // absolute path to the microservice root
   framework: string;         // e.g. "NestJS", "Express", "FastAPI", "Gin", "Fiber"
-  controllerFile: string;    // relative to scannedDir
-  entries: TransportEntry[]; // only openapi entries for this controller
+  byContractType: {
+    openapi?: TransportEntry[];
+    // ...other contract types
+  };
+  all: TransportEntry[];
+  warnings: Array<{ message: string; file: string; snippet: string }>;
 }
 ```
 
 `TransportEntry` and `HttpEndpointMeta` types are in `tooling/types/transport-scan.ts` — read it for field reference.
 
-If `$ARGUMENTS` is empty — stop: `❌ Путь к входному JSON не передан.`
+If `$ARGUMENTS` is empty or only one argument is provided — stop: `❌ Обязательные аргументы: <scan-json-path> <package-name>`
 
 ---
 
-## Phase 1: Read inputs
+## Phase 0: Discover next unprocessed controller
 
-1. Read the JSON at `$ARGUMENTS`
-2. Read `tooling/types/transport-scan.ts`
-3. Read `{scannedDir}/{controllerFile}` in full
+1. Parse `$ARGUMENTS`: split by the first space → `jsonPath` (everything before), `packageName` (everything after)
+2. Read the JSON at `jsonPath`
+3. Read `tooling/types/transport-scan.ts`
+4. From `byContractType.openapi`, group entries by `entry.file` → get list of unique controller files
+5. For each unique controller file, compute `filename`:
+   - Take basename without extension
+   - Replace all non-alphanumeric characters with `-`
+   - Examples: `chats.controller.ts` → `chats-controller`, `chats_router.py` → `chats-router`
+6. For each controller (in order), check:
+   - Does `packages/{packageName}/openapi/partials/{filename}.yaml` exist? → **already done**, skip
+   - Does `packages/{packageName}/openapi/partials/{filename}.claim` exist? → **claimed by another agent**, skip
+7. The first controller without either file is the **target**
+8. **Immediately** write `packages/{packageName}/openapi/partials/{filename}.claim` with content:
+   ```
+   claimed
+   ```
+   This prevents other parallel agents from picking the same controller.
+9. If **all** controllers already have `.yaml` or `.claim` files → stop:
+   ```
+   ✅ Все контроллеры уже обработаны (или обрабатываются).
+   ```
+
+---
+
+## Phase 1: Read controller source
+
+1. Read `{scannedDir}/{controllerFile}` in full (where `controllerFile` is the target from Phase 0)
 
 ---
 
 ## Phase 2: Collect type names
 
-From entries, collect all unique type names that need schemas:
+From the target controller's entries (filtered from `byContractType.openapi` where `entry.file === controllerFile`), collect all unique type names that need schemas:
 - `entry.endpoint.bodyType`
 - `entry.endpoint.responseType` — unwrap wrappers: strip `Promise<T>` → `T`, `T[]` / `Array<T>` → `T`, generics like `Paginated<T>` → collect both `Paginated` and `T`
 
@@ -199,38 +233,57 @@ Do not include `openapi`, `info`, or `servers` keys.
 
 ## Phase 5: Write output
 
-Output filename from `controllerFile`:
-- Take basename without extension
-- Replace non-alphanumeric chars with `-`
-- Examples: `chats.controller.ts` → `chats-controller`, `chats_router.py` → `chats-router`, `chats_handler.go` → `chats-handler`
+1. Write the generated YAML to: `packages/{packageName}/openapi/partials/{filename}.yaml`
 
-Write to: `.agent-workspace/openapi-partials/{filename}.yaml`
+   Add header comment:
+   ```yaml
+   # partial: {controllerFile}
+   # framework: {framework}
+   # generated: {ISO timestamp}
+   # endpoints: {count}
+   ```
 
-Add header comment:
-```yaml
-# partial: {controllerFile}
-# framework: {framework}
-# generated: {ISO timestamp}
-# endpoints: {count}
-```
+2. Delete `packages/{packageName}/openapi/partials/{filename}.claim`
+
+3. **Check completion**: count controllers that still have no `.yaml` file (ignore `.claim` files — those are in progress).
+   - If **all** controllers now have `.yaml` files → write sentinel:
+     `packages/{packageName}/openapi/partials/.complete`
+     Content (JSON):
+     ```json
+     {
+       "completedAt": "<ISO timestamp>",
+       "totalControllers": N,
+       "scanFile": "<jsonPath>"
+     }
+     ```
 
 ---
 
 ## Phase 6: Report
 
 ```
-✅ Partial записан: .agent-workspace/openapi-partials/{filename}.yaml
+✅ Partial записан: packages/{packageName}/openapi/partials/{filename}.yaml
 
-Контроллер: {controllerFile}
+Контроллер: {controllerFile}   ({X} из {N})
 Фреймворк:  {framework}
 Эндпоинтов: {N}
 Схем сгенерировано: {N}
 
+Осталось необработанных: {M}
+```
+
+If M = 0, append:
+```
+🏁 Все контроллеры обработаны.
+   Создан: packages/{packageName}/openapi/partials/.complete
+   → Можно запускать merge агент.
+```
+
+Show `⚠️` only if there are unresolved types:
+```
 ⚠️ Неразрешённые типы ({N}):
   - SomeType (не найден файл определения)
 ```
-
-Show `⚠️` only if there are unresolved types.
 
 ---
 
@@ -241,3 +294,4 @@ Show `⚠️` only if there are unresolved types.
 - Do not invent field names — only use what is found in source files
 - If a type file has multiple candidates, prefer the one imported by the controller file
 - Path parameters in the path string must have a corresponding `parameters` entry
+- If `.claim` file write fails for any reason — do not proceed with processing (stop and report error)

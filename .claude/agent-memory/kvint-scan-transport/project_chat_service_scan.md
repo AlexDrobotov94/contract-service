@@ -4,7 +4,7 @@ description: Transport profile of chat-service — NestJS with HTTP, WebSocket (
 type: project
 ---
 
-chat-service (D:/kvint-for-contracts/chat-service/apps/chat-service) was scanned on 2026-03-27 from TypeScript source files.
+chat-service (D:/kvint-for-contracts/chat-service/apps/chat-service) was scanned on 2026-03-29 from TypeScript source files.
 
 Transports detected:
 - openapi: ChatsController (@Controller('chats'), lines 33-119) + HealthController (@Controller('health'), lines 9-25)

@@ -1,2 +1,2 @@
-- [chat-service transport scan](project_chat_service_scan.md) — NestJS, openapi+websocket+asyncapi (RabbitMQ via @kvint/core), scanned 2026-03-27
+- [chat-service transport scan](project_chat_service_scan.md) — NestJS, openapi+websocket+asyncapi (RabbitMQ via @kvint/core), scanned 2026-03-29
 - [@kvint/core AMQP pattern](project_kvint_core_amqp_pattern.md) — custom RabbitMQ abstraction in kvint services; maps to asyncapi contract type
