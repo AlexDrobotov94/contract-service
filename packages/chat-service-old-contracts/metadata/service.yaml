@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../../../tooling/schemas/service.schema.json
+
+apiVersion: kvint/v1
+kind: component
+namespace: default
+id: chat-service-old
+name: Chat Service Old
+owner: group:default/team-chat
+lifecycle: experimental
+type: service
+
+system: chat
+domain: chat
+
+tags: []
+
+links: []
+
+contracts:
+  - protocol: http
+    path: openapi/openapi.yaml
+    description: ""
+
+dependsOn: []

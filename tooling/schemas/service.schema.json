@@ -54,10 +54,8 @@
     },
 
     "owner": {
-      "type": "string",
-      "pattern": "^(group|user):([a-z][a-z0-9-]*)\\/([a-z][a-z0-9-]*)$",
-      "description": "Владелец в формате <kind>:<namespace>/<id>. Например: group:default/team-chat",
-      "examples": ["group:default/team-chat", "user:default/john-doe"]
+      "$ref": "owners.schema.json#/definitions/owner",
+      "description": "Владелец в формате <kind>:<namespace>/<id>. Должен быть зарегистрирован в owners.schema.json."
     },
 
     "lifecycle": {

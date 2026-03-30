@@ -1,0 +1,1 @@
+- [chat-service source and contract location](project_chat_service.md) — compiled-only NestJS service; types in chat-kit dist; OpenAPI at chat-contracts/openapi/openapi.yaml

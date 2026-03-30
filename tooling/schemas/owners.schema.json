@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "owners.schema.json",
+  "title": "Owners Registry",
+  "description": "Реестр владельцев (команд и пользователей) для поля owner в service.schema.json",
+
+  "definitions": {
+    "owner": {
+      "type": "string",
+      "description": "Владелец в формате <kind>:<namespace>/<id>.",
+      "enum": ["group:default/team-chat"]
+    }
+  }
+}

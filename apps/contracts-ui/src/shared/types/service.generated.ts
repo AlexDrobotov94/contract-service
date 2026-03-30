@@ -19,7 +19,7 @@ export interface ServiceDescriptor {
   /**
    * Уникальный идентификатор сервиса. Должен быть зарегистрирован в services.schema.json.
    */
-  id: 'chat-service' | 'bff-service' | 'user-service';
+  id: 'chat-service' | 'chat-service-old' | 'bff-service' | 'user-service' | 'payment-service' | 'game-service';
   /**
    * Человекочитаемое название сервиса.
    */
@@ -29,9 +29,9 @@ export interface ServiceDescriptor {
    */
   description?: string;
   /**
-   * Владелец в формате <kind>:<namespace>/<id>. Например: group:default/team-chat
+   * Владелец в формате <kind>:<namespace>/<id>. Должен быть зарегистрирован в owners.schema.json.
    */
-  owner: string;
+  owner: 'group:default/team-chat' | 'group:default/team-game';
   /**
    * Стадия жизненного цикла сервиса.
    */
@@ -108,7 +108,13 @@ export interface ServiceDescriptor {
    * Явные зависимости от других сервисов.
    */
   dependsOn?: {
-    service: 'component:default/chat-service' | 'component:default/bff-service' | 'component:default/user-service';
+    service:
+      | 'component:default/chat-service'
+      | 'component:default/chat-service-old'
+      | 'component:default/bff-service'
+      | 'component:default/user-service'
+      | 'component:default/payment-service'
+      | 'component:default/game-service';
     /**
      * Тип зависимости: http — синхронный вызов, event/queue — асинхронный, socket — WebSocket.
      */

@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Alex24/.claude/plugins/**)",
+      "Read(//c/Users/Alex24/.claude/**)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''skills'''', d.get\\(''''plugins'''', {}\\)\\), indent=2\\)\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(list\\(d.keys\\(\\)\\), indent=2\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=2\\)\\)\")",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" remote show origin)",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" fetch origin)",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" checkout main)",
+      "Bash(git -C \"D:/kvint-for-contracts/chat-service\" pull origin main)",
+      "Bash(npm:*)",
+      "Bash(git:*)",
+      "Bash(find D:/kvint-for-contracts -maxdepth 4 -name package.json -not -path */node_modules/*)",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-1-only-required/with_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-1-only-required/without_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-2-full/with_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-2-full/without_skill/outputs\")",
+      "Bash(mkdir -p \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1/eval-3-no-path/with_skill/outputs\")",
+      "Bash(python -m scripts.aggregate_benchmark \"D:/kvint-for-contracts/contract-service/.claude/skills/kvint-fill-service-yaml/workspace/iteration-1\" --skill-name \"kvint-fill-service-yaml\")",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(where py:*)",
+      "Bash(py:*)",
+      "Bash(start:*)",
+      "Bash(find /d/kvint-for-contracts/chat-service -name *.ts -not -path */node_modules/*)",
+      "Bash(xargs -I {} sh -c \"echo \"\"=== {} ===\"\" && head -50 \"\"{}\"\"\")",
+      "Bash(grep -r .agent-workspace/transport-scan D:/kvint-for-contracts/contract-service/.claude --include=*.md)",
+      "Bash(grep -r transport-scan. D:/kvint-for-contracts/contract-service/.claude --include=*.md)",
+      "Bash(grep:*)",
+      "Bash(find D:/kvint-for-contracts/contract-service/.agent-workspace -name transport-scan*.json -type f)",
+      "Bash(find D:/kvint-for-contracts/contract-service -name *orchestr* -o -name *runner*)",
+      "Bash(python3:*)",
+      "Bash(node:*)"
+    ]
+  }
+}
