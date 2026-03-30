@@ -129,8 +129,8 @@
         "properties": {
           "protocol": {
             "type": "string",
-            "enum": ["http", "queue", "socket", "grpc", "graphql"],
-            "description": "Тип протокола. Определяет UI-компонент для рендеринга (Scalar, AsyncAPI, etc.)."
+            "enum": ["http", "asyncapi", "grpc", "graphql"],
+            "description": "Тип протокола. Определяет UI-компонент для рендеринга (Scalar, AsyncAPI, etc.). asyncapi — объединённый AsyncAPI-файл (RabbitMQ, Socket.IO, Kafka и др.)."
           },
           "path": {
             "type": "string",
