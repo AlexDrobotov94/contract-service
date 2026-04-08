@@ -1,0 +1,1 @@
+- [Chat Service Socket.IO patterns](project_chat_service_socketio.md) — namespace /chat, типы из @kvint/chat-kit, паттерн Ack<T>, расположение socket.yaml

@@ -1,0 +1,739 @@
+openapi: "3.1.0"
+
+info:
+  title: Chat Service API
+  version: 1.0.0
+  description: |
+    REST API for managing chat sessions with voice robots.
+    Supports chat creation, session lifecycle management, message timeline,
+    and build info retrieval.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Chats
+    description: Chat management and session lifecycle
+  - name: Health
+    description: Liveness and readiness probes
+
+security:
+  - bearerAuth: []
+
+paths:
+  /chats:
+    get:
+      operationId: listChats
+      summary: List chats
+      description: Returns a paginated, filtered list of chats for a given project.
+      tags: [Chats]
+      parameters:
+        - name: project
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ChatStatus"
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: script
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: nlu
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: createdBy
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [createdAt, updatedAt]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: Paginated list of chats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    post:
+      operationId: createChat
+      summary: Create or find existing chat
+      description: |
+        Finds an existing chat for the authenticated user + buildId + project combination,
+        or creates a new one if none exists. The user identity is extracted from the JWT token.
+      tags: [Chats]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatInput"
+      responses:
+        "201":
+          description: Chat created or found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /chats/{chatId}:
+    get:
+      operationId: getChatById
+      summary: Get chat by ID
+      tags: [Chats]
+      parameters:
+        - $ref: "#/components/parameters/ChatId"
+      responses:
+        "200":
+          description: Chat object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /chats/{chatId}/build-info:
+    get:
+      operationId: getChatBuildInfo
+      summary: Get build info for a chat
+      description: Returns the script and NLU model metadata associated with the chat's build.
+      tags: [Chats]
+      parameters:
+        - $ref: "#/components/parameters/ChatId"
+      responses:
+        "200":
+          description: Build info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetBuildInfoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /chats/{chatId}/close:
+    post:
+      operationId: closeSession
+      summary: Close the active chat session
+      description: Closes the currently active session for the given chat.
+      tags: [Chats]
+      parameters:
+        - $ref: "#/components/parameters/ChatId"
+      responses:
+        "201":
+          description: Session closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloseSessionOutput"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /chats/{chatId}/start:
+    post:
+      operationId: startSession
+      summary: Start a chat session
+      description: Creates and starts a new session for the given chat.
+      tags: [Chats]
+      parameters:
+        - $ref: "#/components/parameters/ChatId"
+      responses:
+        "201":
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartSessionOutput"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /chats/{chatId}/timeline:
+    get:
+      operationId: getChatTimeline
+      summary: Get chat timeline
+      description: Returns the ordered list of events and messages for the given chat.
+      tags: [Chats]
+      parameters:
+        - $ref: "#/components/parameters/ChatId"
+      responses:
+        "200":
+          description: Chat timeline
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTimelineResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /health/live:
+    get:
+      operationId: healthLive
+      summary: Liveness probe
+      description: Returns ok when the process is alive.
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveResponse"
+
+  /health/ready:
+    get:
+      operationId: healthReady
+      summary: Readiness probe
+      description: Checks MongoDB connectivity and returns a NestJS Terminus health result.
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheckResult"
+        "503":
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheckResult"
+
+components:
+  parameters:
+    ChatId:
+      name: chatId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    BuildInfoNluItem:
+      type: object
+      additionalProperties: false
+      required: [name, version]
+      properties:
+        id:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        name:
+          type: string
+        version:
+          type: string
+
+    BuildInfoScript:
+      type: object
+      additionalProperties: false
+      required: [name, version]
+      properties:
+        id:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        name:
+          type: string
+        version:
+          type: string
+
+    Chat:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - stateVersion
+        - buildId
+        - project
+        - user
+        - sessionIds
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        status:
+          $ref: "#/components/schemas/ChatStatus"
+        stateVersion:
+          type: number
+          default: 0
+        buildId:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        project:
+          type: string
+          minLength: 1
+        user:
+          $ref: "#/components/schemas/ChatUser"
+        activeSessionId:
+          type: string
+          format: uuid
+        activeInstanceQueue:
+          type: string
+          minLength: 1
+        sessionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          default: []
+        errorMessage:
+          type: string
+        createdAt:
+          type: string
+          description: ISO date string
+          format: date-time
+        updatedAt:
+          type: string
+          description: ISO date string
+          format: date-time
+
+    ChatListItem:
+      type: object
+      additionalProperties: false
+      required: [id, status, script, nlu, createdBy, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        status:
+          $ref: "#/components/schemas/ChatStatus"
+        script:
+          oneOf:
+            - $ref: "#/components/schemas/ChatListItemScript"
+            - type: "null"
+        nlu:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatListItemNlu"
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          description: ISO date string
+          format: date-time
+        updatedAt:
+          type: string
+          description: ISO date string
+          format: date-time
+
+    ChatListItemNlu:
+      type: object
+      additionalProperties: false
+      required: [name, version]
+      properties:
+        name:
+          type: string
+        version:
+          type: number
+
+    ChatListItemScript:
+      type: object
+      additionalProperties: false
+      required: [id, name, version]
+      properties:
+        id:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        name:
+          type: string
+        version:
+          type: number
+
+    ChatListResponse:
+      type: object
+      additionalProperties: false
+      required: [items, total, offset, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatListItem"
+        total:
+          type: integer
+          minimum: 0
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+
+    ChatStatus:
+      type: string
+      enum: [active, pending, completed, failed]
+
+    ChatUser:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+
+    CloseSessionOutput:
+      type: object
+      additionalProperties: false
+      required: [ok, chatId, closedSessionId]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        chatId:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        closedSessionId:
+          type: string
+          format: uuid
+
+    CreateChatInput:
+      type: object
+      additionalProperties: false
+      required: [buildId, project]
+      properties:
+        buildId:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        project:
+          type: string
+          minLength: 1
+
+    GetBuildInfoResponse:
+      type: object
+      additionalProperties: false
+      required: [id, script, nlu]
+      properties:
+        id:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        script:
+          $ref: "#/components/schemas/BuildInfoScript"
+        nlu:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuildInfoNluItem"
+
+    GetTimelineResponse:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimelineItem"
+
+    HealthCheckResult:
+      type: object
+      required: [status, info, error, details]
+      properties:
+        status:
+          type: string
+          enum: [ok, error, shutting_down]
+        info:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+        error:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+        details:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+
+    LiveResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: ok
+
+    ProblemDetails:
+      type: object
+      required: [type, title, status, code]
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        traceId:
+          type: string
+        code:
+          type: string
+          enum:
+            - invalid_payload
+            - unauthorized
+            - forbidden
+            - not_found
+            - conflict
+            - too_many_requests
+            - internal_error
+        errors:
+          type: array
+          items:
+            type: object
+            required: [path, message]
+            properties:
+              path:
+                type: array
+                items:
+                  oneOf:
+                    - type: string
+                    - type: integer
+              message:
+                type: string
+
+    StartSessionOutput:
+      type: object
+      additionalProperties: false
+      required: [ok, chatId, sessionId]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        chatId:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        sessionId:
+          type: string
+          format: uuid
+
+    TimelineEventItem:
+      type: object
+      additionalProperties: false
+      required: [kind, key, chatId, sessionId, type, occurredAt]
+      properties:
+        kind:
+          type: string
+          enum: [event]
+        key:
+          type: string
+          minLength: 1
+        chatId:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        sessionId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [session.started, session.ended]
+        occurredAt:
+          type: number
+
+    TimelineItem:
+      oneOf:
+        - $ref: "#/components/schemas/TimelineEventItem"
+        - $ref: "#/components/schemas/TimelineMessageItem"
+      discriminator:
+        propertyName: kind
+
+    TimelineMessageItem:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+        - key
+        - chatId
+        - sessionId
+        - correlationId
+        - role
+        - sideIndex
+        - turnIndex
+        - text
+      properties:
+        kind:
+          type: string
+          enum: [message]
+        key:
+          type: string
+          minLength: 1
+        chatId:
+          type: string
+          description: MongoDB ObjectId (24-char hex)
+          pattern: "^[0-9a-fA-F]{24}$"
+        sessionId:
+          type: string
+          format: uuid
+        correlationId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, bot]
+        sideIndex:
+          type: integer
+          enum: [0, 1]
+        turnIndex:
+          type: integer
+          minimum: 0
+        text:
+          type: string
+        occurredAt:
+          type: ["number", "null"]
+
+  responses:
+    BadRequest:
+      description: Bad Request — validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Forbidden:
+      description: Forbidden — insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Unauthorized:
+      description: Unauthorized — missing or invalid JWT
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"

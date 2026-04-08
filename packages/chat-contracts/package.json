@@ -1,0 +1,8 @@
+{
+  "name": "@kvint/chat-contracts",
+  "version": "1.0.0",
+  "description": "Контракты chat-service: OpenAPI, AsyncAPI (RabbitMQ, Socket.IO)",
+  "private": true,
+  "contracts": true,
+  "license": "ISC"
+}
