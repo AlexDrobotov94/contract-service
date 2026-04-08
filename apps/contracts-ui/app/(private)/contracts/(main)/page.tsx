@@ -1,5 +1,7 @@
-const ContractsPage = () => {
-  return <div>Contracts Page</div>;
+import { ContractsPage } from "@/pages/contracts-page";
+
+const ContractsPageApp = () => {
+  return <ContractsPage />;
 };
 
-export default ContractsPage;
+export default ContractsPageApp;
