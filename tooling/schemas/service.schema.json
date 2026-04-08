@@ -129,8 +129,8 @@
         "properties": {
           "protocol": {
             "type": "string",
-            "enum": ["http", "queue", "socket", "grpc", "graphql"],
-            "description": "Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). queue — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL."
+            "enum": ["http", "rabbitmq", "socket", "grpc", "graphql"],
+            "description": "Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL."
           },
           "path": {
             "type": "string",

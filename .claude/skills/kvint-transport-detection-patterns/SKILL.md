@@ -97,7 +97,7 @@ After scanning, produce a structured list:
 ```
 Detected transports:
   ✅ http      → src/controllers/, src/app.module.ts
-  ✅ queue     → src/consumers/order.consumer.ts (RabbitMQ exchange: orders)
+  ✅ rabbitmq  → src/consumers/order.consumer.ts (RabbitMQ exchange: orders)
   ❌ grpc      → not detected
   ❌ graphql   → not detected
   ❌ socket    → not detected
@@ -108,7 +108,7 @@ Map each detected transport to its Kvint v1 `metadata/service.yaml` contract ent
 | Transport | protocol value | path convention                    |
 |-----------|----------------|------------------------------------|
 | HTTP REST | `http`         | `openapi/openapi.yaml`             |
-| Messaging | `queue`        | `asyncapi/rabbitmq.yaml` or `asyncapi/kafka.yaml` |
+| Messaging | `rabbitmq`     | `asyncapi/rabbitmq.yaml`                           |
 | gRPC      | `grpc`         | `grpc/<service>.proto`             |
 | GraphQL   | `graphql`      | `graphql/schema.graphql`           |
 | WebSocket | `socket`       | `asyncapi/socket.yaml`             |

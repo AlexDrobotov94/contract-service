@@ -44,14 +44,14 @@ app.connectMicroservice({
 
 **Transport enum → protocol mapping:**
 
-| `Transport.*`  | Queue technology | protocol value |
-|----------------|------------------|----------------|
-| `RMQ`          | RabbitMQ         | `queue`        |
-| `KAFKA`        | Kafka            | `queue`        |
-| `REDIS`        | Redis pub/sub    | `queue`        |
-| `NATS`         | NATS             | `queue`        |
-| `TCP`          | Internal TCP     | (internal, skip) |
-| `GRPC`         | gRPC             | → see grpc.md  |
+| `Transport.*`  | Queue technology | protocol value       |
+|----------------|------------------|----------------------|
+| `RMQ`          | RabbitMQ         | `rabbitmq`           |
+| `KAFKA`        | Kafka            | (не поддерживается)  |
+| `REDIS`        | Redis pub/sub    | (не поддерживается)  |
+| `NATS`         | NATS             | (не поддерживается)  |
+| `TCP`          | Internal TCP     | (internal, skip)     |
+| `GRPC`         | gRPC             | → see grpc.md        |
 
 ### Message handlers
 
