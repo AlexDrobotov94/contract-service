@@ -13,7 +13,7 @@ export const ServicePage = async ({ serviceName }: Props) => {
   }
 
   return (
-    <div className="p-8">
+    <div>
       <h2>Single ServicePage</h2>
 
       <ul>

@@ -5,7 +5,8 @@ export const ContractsPage = async () => {
   const services = await getServices();
 
   return (
-    <div className="flex flex-col gap-10 p-5">
+    <div className="flex flex-col gap-6 ">
+      <h1 className="text-3xl">Контракты</h1>
       <ContractsTable services={services} />
     </div>
   );

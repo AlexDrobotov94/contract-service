@@ -4,6 +4,6 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function AppServicesLayout({ children }: Readonly<Props>) {
+export default function AppContractsLayout({ children }: Readonly<Props>) {
   return <PrivateLayout>{children}</PrivateLayout>;
 }
