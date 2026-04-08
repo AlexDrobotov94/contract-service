@@ -38,7 +38,7 @@ contracts:
   - protocol: socket
     path: asyncapi/socket.yaml
     description: Socket.IO события сервиса чатов
-  - protocol: queue
+  - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
     description: RabbitMQ каналы сервиса чатов
 

@@ -1,15 +1,13 @@
+import { getServices } from "@/entities/service/server";
 import { ServicesTable } from "@/widgets/services-table";
-import { ScalarViewer } from "@/shared/lib/scalar-viewer";
-import { getServices } from "@/shared/lib/services";
 
 export const ServicesPage = async () => {
   const services = await getServices();
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-6">
+      <h1 className="text-3xl">Сервисы</h1>
       <ServicesTable services={services} />
-
-      <ScalarViewer url="/openapi.yaml" />
     </div>
   );
 };

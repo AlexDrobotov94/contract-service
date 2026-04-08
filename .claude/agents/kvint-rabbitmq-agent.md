@@ -194,7 +194,7 @@ Write to `packages/<package-name>/asyncapi/rabbitmq.yaml`, then report:
 2. List of channels
 3. List of operations (action + summary)
 4. List of message schemas
-5. Reminder: добавить запись `protocol: queue, path: asyncapi/rabbitmq.yaml` в `service.yaml` этого пакета, если её там ещё нет
+5. Reminder: добавить запись `protocol: rabbitmq, path: asyncapi/rabbitmq.yaml` в `service.yaml` этого пакета, если её там ещё нет
 
 > **Язык документации**: все `description`, `summary`, `title` и другие текстовые поля в генерируемом YAML должны быть написаны **на русском языке**.
 

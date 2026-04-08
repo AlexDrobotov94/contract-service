@@ -132,7 +132,7 @@ contracts:
 Пути фиксированы по протоколу и не переопределяются пользователем:
 
 - `http` → `openapi/openapi.yaml`
-- `queue` → `asyncapi/rabbitmq.yaml` (RabbitMQ/AMQP)
+- `rabbitmq` → `asyncapi/rabbitmq.yaml` (RabbitMQ/AMQP)
 - `socket` → `asyncapi/socket.yaml` (Socket.IO)
 
 Пример с несколькими транспортами:
@@ -143,7 +143,7 @@ contracts:
     path: openapi/openapi.yaml
   - protocol: socket
     path: asyncapi/socket.yaml
-  - protocol: queue
+  - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
 ```
 

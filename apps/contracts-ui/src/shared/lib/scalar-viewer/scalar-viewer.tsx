@@ -5,18 +5,17 @@ import { useTheme } from "next-themes";
 
 import "@scalar/api-reference-react/style.css";
 
-type Props = {
-  url: string;
-};
+type Props = { content: string };
 
-export function ScalarViewer({ url }: Props) {
+export function ScalarViewer({ content }: Props) {
+  // TODO: validation
   const { resolvedTheme } = useTheme();
 
   return (
     <ApiReferenceReact
       key={resolvedTheme}
       configuration={{
-        url, // /openapi.yaml
+        content,
         forceDarkModeState: resolvedTheme === "dark" ? "dark" : "light",
         hideDarkModeToggle: true,
         withDefaultFonts: false,

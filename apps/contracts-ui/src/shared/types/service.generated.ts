@@ -77,9 +77,9 @@ export interface ServiceDescriptor {
   contracts: [
     {
       /**
-       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). queue — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
+       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
        */
-      protocol: 'http' | 'queue' | 'socket' | 'grpc' | 'graphql';
+      protocol: 'http' | 'rabbitmq' | 'socket' | 'grpc' | 'graphql';
       /**
        * Относительный путь к файлу контракта от корня пакета. Например: openapi/openapi.yaml
        */
@@ -91,9 +91,9 @@ export interface ServiceDescriptor {
     },
     ...{
       /**
-       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). queue — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
+       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
        */
-      protocol: 'http' | 'queue' | 'socket' | 'grpc' | 'graphql';
+      protocol: 'http' | 'rabbitmq' | 'socket' | 'grpc' | 'graphql';
       /**
        * Относительный путь к файлу контракта от корня пакета. Например: openapi/openapi.yaml
        */

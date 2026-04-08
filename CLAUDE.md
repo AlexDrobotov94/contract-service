@@ -62,11 +62,11 @@ contracts:
     path: openapi/openapi.yaml
   - protocol: socket
     path: asyncapi/socket.yaml
-  - protocol: queue
+  - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
 ```
 
-Supported protocol values: `http`, `queue`, `socket`, `grpc`, `graphql`.
+Supported protocol values: `http`, `rabbitmq`, `socket`, `grpc`, `graphql`.
 Each asyncapi transport is a separate entry — one file per transport, no merging.
 
 ### Contract package folder structure
