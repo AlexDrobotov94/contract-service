@@ -19,7 +19,7 @@ export interface ServiceDescriptor {
   /**
    * Уникальный идентификатор сервиса. Должен быть зарегистрирован в services.schema.json.
    */
-  id: 'chat-service' | 'chat-service-old' | 'bff-service' | 'user-service' | 'payment-service' | 'game-service';
+  id: 'chat-service' | 'chat-service-old' | 'bff-service' | 'user-service' | 'payment-service';
   /**
    * Человекочитаемое название сервиса.
    */
@@ -31,7 +31,7 @@ export interface ServiceDescriptor {
   /**
    * Владелец в формате <kind>:<namespace>/<id>. Должен быть зарегистрирован в owners.schema.json.
    */
-  owner: 'group:default/team-chat' | 'group:default/team-game';
+  owner: 'group:default/team-chat';
   /**
    * Стадия жизненного цикла сервиса.
    */
@@ -77,7 +77,7 @@ export interface ServiceDescriptor {
   contracts: [
     {
       /**
-       * Тип протокола. Определяет UI-компонент для рендеринга (Scalar, AsyncAPI, etc.).
+       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). queue — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
        */
       protocol: 'http' | 'queue' | 'socket' | 'grpc' | 'graphql';
       /**
@@ -91,7 +91,7 @@ export interface ServiceDescriptor {
     },
     ...{
       /**
-       * Тип протокола. Определяет UI-компонент для рендеринга (Scalar, AsyncAPI, etc.).
+       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). queue — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
        */
       protocol: 'http' | 'queue' | 'socket' | 'grpc' | 'graphql';
       /**
@@ -113,8 +113,7 @@ export interface ServiceDescriptor {
       | 'component:default/chat-service-old'
       | 'component:default/bff-service'
       | 'component:default/user-service'
-      | 'component:default/payment-service'
-      | 'component:default/game-service';
+      | 'component:default/payment-service';
     /**
      * Тип зависимости: http — синхронный вызов, event/queue — асинхронный, socket — WebSocket.
      */

@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@asyncapi/react-component": "^3.1.0",
     "@manypkg/get-packages": "^3.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-slot": "^1.2.4",

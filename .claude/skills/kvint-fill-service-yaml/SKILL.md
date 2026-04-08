@@ -118,7 +118,7 @@ description: >
 
 ### contracts
 
-Автоматически вставь в файл контракт по умолчанию — не спрашивай пользователя:
+Автоматически вставь в файл HTTP-контракт по умолчанию:
 
 ```yaml
 contracts:
@@ -126,11 +126,26 @@ contracts:
     path: openapi/openapi.yaml
 ```
 
+Если сервис использует asyncapi-транспорты — добавь отдельную запись на каждый.
+Каждый транспорт — самостоятельный файл, без слияния.
+
 Пути фиксированы по протоколу и не переопределяются пользователем:
 
 - `http` → `openapi/openapi.yaml`
-- `queue` → `asyncapi/rabbitmq.yaml`
-- `socket` → `asyncapi/socket.yaml`
+- `queue` → `asyncapi/rabbitmq.yaml` (RabbitMQ/AMQP)
+- `socket` → `asyncapi/socket.yaml` (Socket.IO)
+
+Пример с несколькими транспортами:
+
+```yaml
+contracts:
+  - protocol: http
+    path: openapi/openapi.yaml
+  - protocol: socket
+    path: asyncapi/socket.yaml
+  - protocol: queue
+    path: asyncapi/rabbitmq.yaml
+```
 
 ---
 

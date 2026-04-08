@@ -35,9 +35,12 @@ contracts:
   - protocol: http
     path: openapi/openapi.yaml
     description: REST API для управления сессиями и сообщениями
-  - protocol: asyncapi
-    path: asyncapi/asyncapi.yaml
-    description: Асинхронные контракты (RabbitMQ + Socket.IO)
+  - protocol: socket
+    path: asyncapi/socket.yaml
+    description: Socket.IO события сервиса чатов
+  - protocol: queue
+    path: asyncapi/rabbitmq.yaml
+    description: RabbitMQ каналы сервиса чатов
 
 dependsOn:
   - service: component:default/bff-service

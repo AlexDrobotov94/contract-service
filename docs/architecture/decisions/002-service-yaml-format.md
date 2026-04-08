@@ -45,6 +45,10 @@ links:
 contracts:
   - protocol: http
     path: openapi/openapi.yaml
+  - protocol: socket
+    path: asyncapi/socket.yaml
+  - protocol: queue
+    path: asyncapi/rabbitmq.yaml
 
 dependsOn:
   - service: component:default/user-service
@@ -61,6 +65,7 @@ dependsOn:
 **`contracts[]`** — явный список протоколов с путями к файлам.
 Портал не угадывает где лежат файлы — берёт из этого поля.
 Определяет какие вкладки показывать на странице сервиса.
+Каждый asyncapi-транспорт — отдельная запись: `queue` для RabbitMQ, `socket` для Socket.IO.
 
 **`dependsOn[]`** — явные зависимости от других сервисов.
 Используются для построения графа сервисов.

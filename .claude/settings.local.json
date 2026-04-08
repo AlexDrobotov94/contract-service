@@ -33,7 +33,10 @@
       "Bash(find D:/kvint-for-contracts/contract-service -name *orchestr* -o -name *runner*)",
       "Bash(python3:*)",
       "Bash(node:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "WebFetch(domain:www.asyncapi.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

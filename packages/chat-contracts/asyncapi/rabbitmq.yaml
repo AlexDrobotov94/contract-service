@@ -1,0 +1,672 @@
+asyncapi: "3.1.0"
+info:
+  title: Chat Service RabbitMQ API
+  version: "1.0.0"
+  description: >
+    RabbitMQ-каналы и операции сервиса чатов. Сервис взаимодействует
+    с ботом-дайлером через паттерн request-reply: публикует задания
+    в очереди бота и принимает ответы через собственную очередь ответов
+    kv.chat-service.dev.replies.
+
+servers:
+  rabbitmq:
+    host: localhost:5672
+    protocol: amqp
+    description: Брокер сообщений RabbitMQ
+
+channels:
+  chatServiceRepliesQueue:
+    address: kv.chat-service.dev.replies
+    description: >
+      Очередь ответов chat-service. Бот-дайлер публикует сюда результаты
+      выполнения команд create_session, handle_message и close_session.
+      Сервис подписывается на эту очередь при старте модуля.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.chat-service.dev.replies
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      createSessionReply:
+        $ref: "#/components/messages/CreateSessionReplyMessage"
+      handleMessageReply:
+        $ref: "#/components/messages/HandleMessageReplyMessage"
+
+  dialerTaskQueue:
+    address: kv.dialer.rabbitmq
+    description: >
+      Очередь задач дайлера. Chat-service публикует сюда задание
+      dialing_task для инициирования звонка. Ответ возвращается
+      в очередь kv.chat-service.dev.replies (поле replyTo).
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.dialer.rabbitmq
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      dialingTask:
+        $ref: "#/components/messages/DialingTaskMessage"
+
+  botInstanceQueue:
+    address: null
+    description: >
+      Динамическая очередь конкретного экземпляра бота. Адрес определяется
+      в runtime из поля instance_queue, полученного в ответе create_session.
+      Chat-service публикует сюда команды handle_message и close_session
+      для управления активной сессией бота.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: ""
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      handleMessageRequest:
+        $ref: "#/components/messages/HandleMessageRequestMessage"
+      closeSessionRequest:
+        $ref: "#/components/messages/CloseSessionRequestMessage"
+
+operations:
+  consumeCreateSessionReply:
+    action: receive
+    channel:
+      $ref: "#/channels/chatServiceRepliesQueue"
+    summary: Получение ответа на команду create_session от бота-дайлера
+    description: >
+      Обрабатывается в BotRepliesConsumer. После успешного разбора
+      передаётся в HandleCreateSessionReplyUseCase. Ответ содержит
+      instance_queue — адрес динамической очереди конкретного бота.
+    bindings:
+      amqp:
+        ack: true
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: "#/channels/chatServiceRepliesQueue/messages/createSessionReply"
+
+  consumeHandleMessageReply:
+    action: receive
+    channel:
+      $ref: "#/channels/chatServiceRepliesQueue"
+    summary: Получение ответа на команду handle_message от бота-дайлера
+    description: >
+      Обрабатывается в BotRepliesConsumer. После успешного разбора
+      передаётся в HandleMessageReplyUseCase. Ответ может содержать
+      сгенерированный текст и признаки завершающего состояния.
+    bindings:
+      amqp:
+        ack: true
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: "#/channels/chatServiceRepliesQueue/messages/handleMessageReply"
+
+  publishDialingTask:
+    action: send
+    channel:
+      $ref: "#/channels/dialerTaskQueue"
+    summary: Публикация задания на звонок в очередь дайлера
+    description: >
+      Публикуется из RabbitBotQueue.publishDialingTask при старте сессии.
+      Содержит параметры звонка и адрес очереди для ответа (replyTo).
+      Correlation ID — sessionId сессии чата.
+    bindings:
+      amqp:
+        deliveryMode: 2
+        timestamp: true
+        mandatory: false
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: "#/channels/dialerTaskQueue/messages/dialingTask"
+
+  publishHandleMessage:
+    action: send
+    channel:
+      $ref: "#/channels/botInstanceQueue"
+    summary: Отправка пользовательского сообщения активному боту
+    description: >
+      Публикуется из RabbitBotQueue.publishHandleMessage в динамическую
+      очередь конкретного экземпляра бота. Адрес очереди берётся из
+      поля instance_queue, полученного ранее в ответе create_session.
+    bindings:
+      amqp:
+        deliveryMode: 2
+        timestamp: true
+        mandatory: false
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: "#/channels/botInstanceQueue/messages/handleMessageRequest"
+
+  publishCloseSession:
+    action: send
+    channel:
+      $ref: "#/channels/botInstanceQueue"
+    summary: Закрытие сессии бота
+    description: >
+      Публикуется из RabbitBotQueue.publishCloseSession в динамическую
+      очередь конкретного экземпляра бота. Инициирует завершение
+      разговорной сессии со статусом success или error_after_up.
+    bindings:
+      amqp:
+        deliveryMode: 2
+        timestamp: true
+        mandatory: false
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: "#/channels/botInstanceQueue/messages/closeSessionRequest"
+
+components:
+  messages:
+    CreateSessionReplyMessage:
+      name: CreateSessionReplyMessage
+      title: Ответ на создание сессии
+      summary: Результат выполнения команды create_session ботом-дайлером
+      contentType: application/json
+      bindings:
+        amqp:
+          messageType: create_session.reply
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: "#/components/schemas/CreateSessionReplyEnvelope"
+
+    HandleMessageReplyMessage:
+      name: HandleMessageReplyMessage
+      title: Ответ на обработку сообщения
+      summary: Результат выполнения команды handle_message ботом-дайлером
+      contentType: application/json
+      bindings:
+        amqp:
+          messageType: handle_message.reply
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: "#/components/schemas/HandleMessageReplyEnvelope"
+
+    DialingTaskMessage:
+      name: DialingTaskMessage
+      title: Задание на звонок
+      summary: Запрос к дайлеру на инициирование звонка и создание сессии бота
+      contentType: application/json
+      bindings:
+        amqp:
+          messageType: dialing_task
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: "#/components/schemas/DialingTaskEnvelope"
+
+    HandleMessageRequestMessage:
+      name: HandleMessageRequestMessage
+      title: Запрос на обработку сообщения
+      summary: Передача сообщения пользователя активному экземпляру бота
+      contentType: application/json
+      bindings:
+        amqp:
+          messageType: handle_message.request
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: "#/components/schemas/HandleMessageRequestEnvelope"
+
+    CloseSessionRequestMessage:
+      name: CloseSessionRequestMessage
+      title: Запрос на закрытие сессии
+      summary: Команда завершения активной разговорной сессии бота
+      contentType: application/json
+      bindings:
+        amqp:
+          messageType: close_session.request
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: "#/components/schemas/CloseSessionRequestEnvelope"
+
+  schemas:
+    # ─── Общий конверт (envelope shell) для request-сообщений ───────────────
+    EnvelopeShell:
+      type: object
+      description: Общая обёртка для исходящих сообщений chat-service → бот
+      properties:
+        version:
+          type: integer
+          description: Версия протокола (всегда 1)
+          example: 1
+        correlation_id:
+          type: string
+          description: Идентификатор корреляции для связки запрос-ответ
+        status:
+          type: string
+          description: Статус конверта (всегда "Complete")
+          example: Complete
+        num:
+          type: integer
+          description: Порядковый номер сообщения
+          example: 1
+        start_date:
+          type: string
+          description: Дата начала обработки в формате "YYYY-MM-DD HH:mm:ss"
+        send_date:
+          type: string
+          description: Дата отправки в формате "YYYY-MM-DD HH:mm:ss"
+        from:
+          type: string
+          description: Идентификатор отправителя
+          example: kvint-dialer-go
+        to:
+          type: string
+          description: Идентификатор получателя
+          example: web
+        ttl:
+          type: integer
+          description: Время жизни сообщения в секундах
+          example: 60
+      required:
+        - version
+        - correlation_id
+        - status
+        - num
+        - start_date
+        - send_date
+        - from
+        - to
+        - ttl
+
+    # ─── Общий конверт для reply-сообщений (бот → chat-service) ────────────
+    ReplyEnvelopeShell:
+      type: object
+      description: Общая обёртка для входящих ответов от бота
+      properties:
+        version:
+          type: integer
+          description: Версия протокола
+        correlation_id:
+          type: string
+          description: Идентификатор корреляции, совпадает с отправленным запросом
+        status:
+          type: string
+          description: Статус конверта
+        num:
+          type: integer
+          description: Порядковый номер сообщения
+        start_date:
+          type: string
+          description: Дата начала обработки
+        send_date:
+          type: string
+          description: Дата отправки ответа
+        from:
+          type: string
+          description: Идентификатор отправителя (бот)
+        to:
+          type: string
+          description: Идентификатор получателя (chat-service)
+        ttl:
+          type: integer
+          description: Время жизни сообщения в секундах
+      required:
+        - version
+        - correlation_id
+        - status
+        - num
+        - start_date
+        - send_date
+        - from
+        - to
+        - ttl
+
+    # ─── DialingTaskEnvelope ─────────────────────────────────────────────────
+    DialingTaskEnvelope:
+      type: object
+      description: >
+        Задание на звонок, отправляемое в очередь kv.dialer.rabbitmq.
+        Имеет особый формат с полями Func/Data в верхнем регистре
+        (отличается от остальных конвертов).
+      properties:
+        Func:
+          type: string
+          enum:
+            - dialing_task
+          description: Идентификатор команды
+        Data:
+          type: object
+          description: Параметры задания на звонок
+          properties:
+            id:
+              type: string
+              description: Идентификатор сессии (sessionId)
+            task_id:
+              type: string
+              description: Идентификатор задачи в конфигурации дайлера
+            phone:
+              type: string
+              description: Номер телефона для звонка
+            company_id:
+              type: string
+              description: Идентификатор компании
+            build_id:
+              type: string
+              description: Идентификатор сборки бота
+            save_record_on_every_step:
+              type: boolean
+              description: Сохранять запись на каждом шаге
+            voice:
+              type: string
+              enum:
+                - default
+              description: Голос для синтеза речи
+            bot_data:
+              type: string
+              description: Дополнительные данные бота (JSON-строка)
+            company_data:
+              type: string
+              description: Дополнительные данные компании (JSON-строка)
+            tz:
+              type: integer
+              description: Часовой пояс в часах от UTC
+            call_ttl:
+              type: integer
+              description: Максимальное время звонка в секундах
+            is_test:
+              type: boolean
+              description: Признак тестового звонка
+            error:
+              type: string
+              description: Строка ошибки (пустая строка при отсутствии ошибки)
+            caller_queue_to_make_replies:
+              type: string
+              description: Имя очереди для ответов (kv.chat-service.dev.replies)
+            call_data:
+              type: object
+              description: Технические параметры звонка
+              properties:
+                callerid:
+                  type: string
+                  description: Caller ID
+                trunk:
+                  type: string
+                  description: Транк для исходящего звонка
+                seconds_for_success:
+                  type: integer
+                  description: Количество секунд для определения успешного звонка
+                caller_queue_id:
+                  type: string
+                  description: Идентификатор очереди звонящего
+                dest:
+                  type: string
+                  description: Направление звонка
+                timeout:
+                  type: integer
+                  description: Таймаут звонка в секундах
+                phone:
+                  type: string
+                  description: Номер телефона
+                channel_id:
+                  type: string
+                  description: Идентификатор канала
+                external_id:
+                  type: string
+                  description: Внешний идентификатор
+                region:
+                  type: string
+                  description: Регион
+                enable_silence_as_down:
+                  type: boolean
+                  description: Считать тишину как недозвон
+                call_date:
+                  type: integer
+                  description: Unix timestamp даты звонка
+                attempt_number:
+                  type: integer
+                  description: Номер попытки звонка
+              required:
+                - callerid
+                - trunk
+                - seconds_for_success
+                - caller_queue_id
+                - dest
+                - timeout
+                - phone
+                - channel_id
+                - external_id
+                - region
+                - enable_silence_as_down
+                - call_date
+                - attempt_number
+          required:
+            - id
+            - task_id
+            - phone
+            - company_id
+            - build_id
+            - save_record_on_every_step
+            - voice
+            - bot_data
+            - company_data
+            - tz
+            - call_ttl
+            - is_test
+            - error
+            - caller_queue_to_make_replies
+            - call_data
+      required:
+        - Func
+        - Data
+
+    # ─── HandleMessageRequestEnvelope ───────────────────────────────────────
+    HandleMessageRequestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeShell"
+        - type: object
+          description: >
+            Запрос на обработку сообщения пользователя, отправляемый
+            в динамическую очередь конкретного экземпляра бота.
+          properties:
+            data:
+              type: object
+              description: Тело запроса handle_message
+              properties:
+                req_params:
+                  type: object
+                  description: Параметры запроса
+                  properties:
+                    func:
+                      type: string
+                      enum:
+                        - handle_message
+                      description: Идентификатор команды
+                    call_id:
+                      type: string
+                      description: Идентификатор звонка (sessionId)
+                  required:
+                    - func
+                    - call_id
+                func:
+                  type: string
+                  enum:
+                    - handle_message
+                  description: Идентификатор команды (дублирует req_params.func)
+                session_id:
+                  type: string
+                  description: Идентификатор сессии бота
+                message:
+                  type: string
+                  description: Текст сообщения пользователя
+              required:
+                - req_params
+                - func
+                - session_id
+                - message
+          required:
+            - data
+
+    # ─── CloseSessionRequestEnvelope ────────────────────────────────────────
+    CloseSessionRequestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeShell"
+        - type: object
+          description: >
+            Запрос на закрытие сессии бота, отправляемый в динамическую
+            очередь конкретного экземпляра бота.
+          properties:
+            data:
+              type: object
+              description: Тело запроса close_session
+              properties:
+                req_params:
+                  type: object
+                  description: Параметры запроса
+                  properties:
+                    func:
+                      type: string
+                      enum:
+                        - close_session
+                      description: Идентификатор команды
+                    call_id:
+                      type: string
+                      description: Идентификатор звонка (sessionId)
+                  required:
+                    - func
+                    - call_id
+                func:
+                  type: string
+                  enum:
+                    - close_session
+                  description: Идентификатор команды (дублирует req_params.func)
+                session_id:
+                  type: string
+                  description: Идентификатор сессии бота
+                status:
+                  type: string
+                  description: Статус завершения сессии
+                  example: success
+              required:
+                - req_params
+                - func
+                - session_id
+                - status
+          required:
+            - data
+
+    # ─── CreateSessionReplyEnvelope ──────────────────────────────────────────
+    CreateSessionReplyEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ReplyEnvelopeShell"
+        - type: object
+          description: >
+            Ответ бота на создание сессии. Содержит instance_queue —
+            адрес динамической очереди конкретного экземпляра бота,
+            используемый для последующих запросов handle_message и close_session.
+          properties:
+            data:
+              type: object
+              description: Данные ответа create_session
+              properties:
+                res_params:
+                  type: object
+                  description: Параметры ответа
+                  properties:
+                    response_status:
+                      type: string
+                      enum:
+                        - success
+                        - error
+                      description: Статус выполнения команды
+                    response_error:
+                      type: string
+                      description: Описание ошибки (пустая строка при успехе)
+                    call_id:
+                      type: string
+                      description: Идентификатор звонка
+                    func:
+                      type: string
+                      enum:
+                        - create_session
+                      description: Идентификатор выполненной команды
+                  required:
+                    - response_status
+                    - response_error
+                    - call_id
+                    - func
+                session_id:
+                  type: string
+                  description: Идентификатор сессии бота
+                instance_queue:
+                  type: string
+                  description: >
+                    Имя очереди конкретного экземпляра бота.
+                    Используется как адрес для publishHandleMessage и publishCloseSession.
+                generated_text:
+                  type: string
+                  description: Первый сгенерированный текст бота (опционально)
+              required:
+                - res_params
+                - session_id
+          required:
+            - data
+
+    # ─── HandleMessageReplyEnvelope ──────────────────────────────────────────
+    HandleMessageReplyEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ReplyEnvelopeShell"
+        - type: object
+          description: Ответ бота на обработку сообщения пользователя
+          properties:
+            data:
+              type: object
+              description: Данные ответа handle_message
+              properties:
+                res_params:
+                  type: object
+                  description: Параметры ответа
+                  properties:
+                    response_status:
+                      type: string
+                      enum:
+                        - success
+                        - error
+                      description: Статус выполнения команды
+                    response_error:
+                      type: string
+                      description: Описание ошибки
+                    call_id:
+                      type: string
+                      description: Идентификатор звонка
+                    func:
+                      type: string
+                      enum:
+                        - handle_message
+                      description: Идентификатор выполненной команды
+                  required:
+                    - response_status
+                    - response_error
+                    - call_id
+                    - func
+                session_id:
+                  type: string
+                  description: Идентификатор сессии бота
+                generated_text:
+                  type: string
+                  description: Сгенерированный ответ бота (опционально)
+                is_final_state:
+                  type: boolean
+                  description: Признак завершающего состояния диалога (опционально)
+                is_operator_state:
+                  type: boolean
+                  description: Признак перевода на оператора (опционально)
+              required:
+                - res_params
+                - session_id
+          required:
+            - data
