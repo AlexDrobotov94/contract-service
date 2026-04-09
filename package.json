@@ -3,12 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "generate:types": "ts-node tooling/generate-types.ts",
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "npm run generate:types && turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
-    "generate:types": "ts-node tooling/generate-types.ts"
+    "check-types": "turbo run check-types"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

@@ -7,7 +7,7 @@ type Props = {
 
 export const PrivateLayout = ({ children }: Props) => {
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] grid-cols-[240px_1fr] min-h-screen">
+    <div className="grid grid-rows-[auto_1fr] grid-cols-[240px_1fr] min-h-screen">
       <header className="col-span-2">
         <Header />
       </header>
@@ -15,7 +15,6 @@ export const PrivateLayout = ({ children }: Props) => {
         <SidebarMenu />
       </aside>
       <main className="px-6 py-6">{children}</main>
-      <footer className="col-span-2 border-t px-6 py-4">Footer</footer>
     </div>
   );
 };
