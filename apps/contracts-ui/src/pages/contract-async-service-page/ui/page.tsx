@@ -5,5 +5,10 @@ type Props = {
 };
 
 export const ContractAsyncServicePage = ({ contract }: Props) => {
-  return <AsyncApiViewer schema={contract} />;
+  return (
+    <div className=" ">
+      {/* <div>hi</div> */}
+      <AsyncApiViewer schema={contract} />
+    </div>
+  );
 };

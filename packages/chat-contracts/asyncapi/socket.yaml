@@ -80,6 +80,8 @@ operations:
   chatJoinReceive:
     action: receive
     summary: Вход клиента в комнату чата
+    tags:
+      - name: Комната
     channel:
       $ref: "#/channels/chat_join"
     messages:
@@ -91,6 +93,8 @@ operations:
   chatLeaveReceive:
     action: receive
     summary: Выход клиента из комнаты чата
+    tags:
+      - name: Комната
     channel:
       $ref: "#/channels/chat_leave"
     messages:
@@ -99,6 +103,8 @@ operations:
   messageSendReceive:
     action: receive
     summary: Отправка сообщения от клиента
+    tags:
+      - name: Сообщения
     channel:
       $ref: "#/channels/message_send"
     messages:
@@ -110,6 +116,8 @@ operations:
   processingCatchupReceive:
     action: receive
     summary: Запрос клиентом состояния обработки сообщений
+    tags:
+      - name: Обработка
     channel:
       $ref: "#/channels/processing_catchup"
     messages:
@@ -121,6 +129,8 @@ operations:
   timelineCatchupSend:
     action: send
     summary: Отправка снимка истории чата клиенту при входе
+    tags:
+      - name: Таймлайн
     channel:
       $ref: "#/channels/timeline_catchup"
     messages:
@@ -129,6 +139,8 @@ operations:
   chatUpdatedSend:
     action: send
     summary: Уведомление об изменении состояния чата
+    tags:
+      - name: Комната
     channel:
       $ref: "#/channels/chat_updated"
     messages:
@@ -137,6 +149,8 @@ operations:
   timelineNewSend:
     action: send
     summary: Публикация нового элемента таймлайна
+    tags:
+      - name: Таймлайн
     channel:
       $ref: "#/channels/timeline_new"
     messages:
@@ -145,6 +159,8 @@ operations:
   processingUpdatedSend:
     action: send
     summary: Уведомление об обновлении статуса обработки
+    tags:
+      - name: Обработка
     channel:
       $ref: "#/channels/processing_updated"
     messages:
@@ -153,6 +169,8 @@ operations:
   previewNewSend:
     action: send
     summary: Трансляция стримингового превью ответа бота
+    tags:
+      - name: Стриминг
     channel:
       $ref: "#/channels/preview_new"
     messages:

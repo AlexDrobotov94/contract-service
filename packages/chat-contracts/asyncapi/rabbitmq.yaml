@@ -83,6 +83,8 @@ channels:
 operations:
   consumeCreateSessionReply:
     action: receive
+    tags:
+      - name: Сессия
     channel:
       $ref: "#/channels/chatServiceRepliesQueue"
     summary: Получение ответа на команду create_session от бота-дайлера
@@ -101,6 +103,8 @@ operations:
 
   consumeHandleMessageReply:
     action: receive
+    tags:
+      - name: Сообщения
     channel:
       $ref: "#/channels/chatServiceRepliesQueue"
     summary: Получение ответа на команду handle_message от бота-дайлера
@@ -119,6 +123,8 @@ operations:
 
   publishDialingTask:
     action: send
+    tags:
+      - name: Звонок
     channel:
       $ref: "#/channels/dialerTaskQueue"
     summary: Публикация задания на звонок в очередь дайлера
@@ -137,6 +143,8 @@ operations:
 
   publishHandleMessage:
     action: send
+    tags:
+      - name: Сообщения
     channel:
       $ref: "#/channels/botInstanceQueue"
     summary: Отправка пользовательского сообщения активному боту
@@ -155,6 +163,8 @@ operations:
 
   publishCloseSession:
     action: send
+    tags:
+      - name: Сессия
     channel:
       $ref: "#/channels/botInstanceQueue"
     summary: Закрытие сессии бота

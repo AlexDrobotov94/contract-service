@@ -53,6 +53,31 @@ For each unique `entry.file` across filtered entries:
 - Exchange name and routing key (from method arguments)
 - Payload type
 
+## Phase 2.5: Assign operation tags
+
+Group operations by their primary domain identifier — derived from the routing key or exchange name prefix (the segment before the first `.` or `_`):
+- e.g., `chat.message.created`, `chat.room.joined` → prefix `chat` → one tag
+- e.g., `payment.created`, `payment.failed` → prefix `payment` → one tag
+
+For each group, derive a tag name — translate to Russian if the prefix maps to a known domain term:
+
+| Prefix | Tag |
+|---|---|
+| `chat` | `Чат` |
+| `message` | `Сообщения` |
+| `payment` | `Платежи` |
+| `user` | `Пользователи` |
+| `notification` | `Уведомления` |
+| `order` | `Заказы` |
+| `auth` | `Авторизация` |
+| `session` | `Сессия` |
+| `processing` | `Обработка` |
+| `analytics` | `Аналитика` |
+
+The table above is a reference for common cases only — not an exhaustive list. For any prefix not in the table, derive a meaningful tag from the domain context of the routing key, exchange name, and payload type. Capitalized prefix as-is is a fallback, not a default.
+
+Assign each operation its tag. Operations sharing the same prefix get the same tag.
+
 ## Phase 3: Generate rabbitmq.yaml
 
 > **Specification reference**: before generating, read `.claude/skills/asyncapi-reference/SKILL.md`.
@@ -94,6 +119,8 @@ channels:
 operations:
   <operationId>:
     action: send  # send = publish, receive = subscribe
+    tags:
+      - name: <TagName>  # from Phase 2.5
     channel:
       $ref: '#/channels/<channelId>'
     summary: <summary>

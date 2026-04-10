@@ -47,6 +47,31 @@ From filtered entries, build a list of events. Each entry provides:
 
 If the same event name appears as both inbound and outbound — create two separate operations (`<name>Receive` and `<name>Send`) referencing the same channel.
 
+## Phase 2.5: Assign operation tags
+
+Group events by their name prefix (the part before `:` or `_` separator):
+- e.g., `chat:join`, `chat:leave`, `chat:updated` → one group → one tag
+- e.g., `message:send` → separate group → separate tag
+
+For each group, derive a tag name — translate to Russian if the prefix maps to a known domain term:
+
+| Prefix | Tag |
+|---|---|
+| `chat` | `Чат` |
+| `message` | `Сообщения` |
+| `timeline` | `Таймлайн` |
+| `processing` | `Обработка` |
+| `preview` | `Стриминг` |
+| `user` | `Пользователи` |
+| `room` | `Комнаты` |
+| `notification` | `Уведомления` |
+| `session` | `Сессия` |
+| `auth` | `Авторизация` |
+
+The table above is a reference for common cases only — not an exhaustive list. For any prefix not in the table, derive a meaningful tag from the domain context of the event name and its payload. Capitalized prefix as-is is a fallback, not a default.
+
+Assign each operation its tag. Operations with the same prefix get the same tag.
+
 ## Phase 3: Generate socket.yaml
 
 > **Specification reference**: before generating, read `.claude/skills/asyncapi-reference/SKILL.md`.
@@ -78,6 +103,8 @@ channels:
 operations:
   <eventName>Receive:  # for client→server events
     action: receive
+    tags:
+      - name: <TagName>  # from Phase 2.5
     channel:
       $ref: '#/channels/<eventName>'
     messages:
@@ -85,6 +112,8 @@ operations:
   
   <eventName>Send:  # for server→client events
     action: send
+    tags:
+      - name: <TagName>  # from Phase 2.5
     channel:
       $ref: '#/channels/<eventName>'
     messages:
