@@ -17,13 +17,18 @@ type: service
 system: voice-robots
 domain: chat
 
+source: https://gitlab.prod.kvint.io/kvint/web/chat-service
+
 links:
-  - url: https://gitlab.kvint.io/voice-robots/chat-service
-    title: GitLab
-    icon: gitlab
   - url: https://grafana.kvint.io/d/chat
     title: Grafana
-    icon: dashboard
+    icon: alert
+  - url: https://grafana.kvint.io/d/chat2
+    title: Prod
+    icon: website
+  - url: https://grafana.kvint.io/d/chat1
+    title: Prod2
+    icon: support
 
 tags:
   - nestjs

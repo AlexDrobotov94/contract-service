@@ -92,9 +92,15 @@
       "description": "Теги для фильтрации и поиска. Например: nestjs, rabbitmq, postgresql."
     },
 
+    "source": {
+      "type": "string",
+      "format": "uri",
+      "description": "Ссылка на репозиторий сервиса в GitLab/GitHub. Отображается отдельно в блоке About как VIEW SOURCE."
+    },
+
     "links": {
       "type": "array",
-      "description": "Ссылки на внешние ресурсы сервиса: GitLab, Grafana, Runbook и т.д.",
+      "description": "Ссылки на внешние ресурсы сервиса: Grafana, Runbook, Slack и т.д.",
       "items": {
         "type": "object",
         "required": ["url", "title"],
@@ -111,8 +117,12 @@
           },
           "icon": {
             "type": "string",
-            "enum": ["gitlab", "dashboard", "docs", "runbook", "alert"],
-            "description": "Иконка для отображения в портале."
+            "enum": [
+              "alert",
+              "support",
+              "website"
+            ],
+            "description": "Иконка для отображения в портале. alert — система алертов/мониторинг, support — поддержка/команда, website — сайт/документация."
           }
         }
       }

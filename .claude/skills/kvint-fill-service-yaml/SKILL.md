@@ -174,9 +174,17 @@ contracts:
 «Добавить теги для фильтрации? (да/нет)»
 Если да: «Введи теги через запятую (только строчные буквы, цифры, дефисы и точки, например: nestjs,postgresql,rabbitmq)»
 
+### source
+
+«Добавить ссылку на репозиторий сервиса в GitLab/GitHub? (да/нет)»
+
+Если да: «Введи URL репозитория (например: https://gitlab.kvint.io/voice-robots/chat-service)»
+
+Поле `source` отображается в блоке About как VIEW SOURCE с иконкой GitLab.
+
 ### links
 
-«Добавить ссылки на внешние ресурсы (GitLab, Grafana, Runbook...)? (да/нет)»
+«Добавить ссылки на внешние ресурсы? (да/нет)»
 
 Для каждой ссылки:
 
@@ -184,11 +192,9 @@ contracts:
 2. **Заголовок** — название ссылки
 3. **Иконка** (необязательно):
    ```
-   1. gitlab
-   2. dashboard
-   3. docs
-   4. runbook
-   5. alert
+   1. alert    (мониторинг, алерты)
+   2. support  (поддержка, команда)
+   3. website  (сайт, документация)
    (Enter — пропустить)
    ```
 
@@ -233,6 +239,7 @@ contracts:
 - `description` — не включай блок в файл
 - `type` — `service`
 - `tags` — `[]`
+- `source` — не включай блок в файл
 - `links` — `[]`
 - `dependsOn` — `[]`
 - contract `description` — `""`
@@ -260,6 +267,8 @@ domain: { domain }
 tags:
   - { tag }
 
+source: { source_url }
+
 links:
   - url: { url }
     title: { title }
@@ -278,6 +287,7 @@ dependsOn:
 
 Блок `description:` пиши только если пользователь его заполнил.
 `tags: []`, `links: []`, `dependsOn: []` — если пустые.
+`source` — только если был указан.
 Иконку в links — только если была выбрана.
 
 ---

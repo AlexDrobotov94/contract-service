@@ -38,9 +38,9 @@ tags:
   - rabbitmq
 
 links:
-  - url: https://gitlab.kvint.io/...
-    title: GitLab
-    icon: gitlab
+  - url: https://grafana.kvint.io/d/...
+    title: Grafana
+    icon: alert
 
 contracts:
   - protocol: http

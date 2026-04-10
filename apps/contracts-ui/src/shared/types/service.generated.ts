@@ -53,7 +53,11 @@ export interface ServiceDescriptor {
    */
   tags?: string[];
   /**
-   * Ссылки на внешние ресурсы сервиса: GitLab, Grafana, Runbook и т.д.
+   * Ссылка на репозиторий сервиса в GitLab/GitHub. Отображается отдельно в блоке About как VIEW SOURCE.
+   */
+  source?: string;
+  /**
+   * Ссылки на внешние ресурсы сервиса: Grafana, Runbook, Slack и т.д.
    */
   links?: {
     /**
@@ -65,9 +69,9 @@ export interface ServiceDescriptor {
      */
     title: string;
     /**
-     * Иконка для отображения в портале.
+     * Иконка для отображения в портале. alert — система алертов/мониторинг, support — поддержка/команда, website — сайт/документация.
      */
-    icon?: 'gitlab' | 'dashboard' | 'docs' | 'runbook' | 'alert';
+    icon?: 'alert' | 'support' | 'website';
   }[];
   /**
    * Список контрактных файлов сервиса. Определяет какие вкладки показывать в портале.

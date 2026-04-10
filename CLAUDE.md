@@ -57,6 +57,11 @@ owner: group:default/<team>
 lifecycle: experimental | production | deprecated
 system: <system>
 domain: <domain>
+source: https://gitlab.kvint.io/<group>/<repo>  # optional, shown as VIEW SOURCE in About block
+links:                                            # optional arbitrary links
+  - url: https://grafana.kvint.io/d/<id>
+    title: Grafana
+    icon: alert  # alert | support | website
 contracts:
   - protocol: http
     path: openapi/openapi.yaml
