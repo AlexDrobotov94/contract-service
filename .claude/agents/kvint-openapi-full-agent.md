@@ -262,9 +262,25 @@ UnresolvedType:
 
 ## Phase 5: Write output
 
-Write the generated YAML to: `packages/{packageName}/openapi/openapi.yaml`
+1. Check if `packages/{packageName}/openapi/openapi.yaml` already exists.
 
-If the file already exists — overwrite it.
+2. **If EXISTS (update mode)**:
+   a. Read the existing file.
+   b. Parse both the existing YAML and the newly generated YAML.
+   c. Apply a **minimal diff** strategy — preserve from the existing file:
+      - Custom `description` fields that are non-empty (not `""`) — these were likely written by hand.
+      - All `x-*` extension fields at any level.
+      - Security schemes in `components.securitySchemes` that are not present in the new generation.
+      - Paths or operations **not present in the scan result** (could be manually added endpoints).
+      - `externalDocs` at any level if present.
+   d. From the new generation, apply:
+      - New paths and operations that did not exist before.
+      - Updated `parameters`, `requestBody`, `responses` for paths that ARE in the scan result.
+      - New schemas in `components.schemas` from the scan.
+   e. For conflicting schemas (same name, different shape): prefer the newly generated version (it reflects the current source code).
+   f. Write the merged result.
+
+3. **If NOT EXISTS (create mode)**: write the generated YAML as-is.
 
 Add generation comment at the top of the file:
 ```yaml

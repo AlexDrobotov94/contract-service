@@ -141,6 +141,25 @@ components:
 
 **Acknowledgements**: If `endpoint.ackType` is present (inbound only), document it as a reply schema in `components`.
 
+## Phase 3.7: Update mode check (before writing)
+
+1. Check if `packages/<package-name>/asyncapi/socket.yaml` already exists.
+2. **If EXISTS (update mode)**:
+   a. Read the current file.
+   b. Parse both the existing YAML and the newly generated YAML.
+   c. Apply a **minimal diff** — preserve from the existing file:
+      - Channels and operations **not present in the new scan result** (could be manually added).
+      - Non-empty `description` and `summary` fields that were likely written by hand.
+      - All `x-*` extension fields at any level.
+      - Custom `bindings` not derived from the scan.
+      - `externalDocs` if present.
+   d. From the new generation, apply:
+      - New channels/operations present in the scan result.
+      - Updated payload schemas for channels that ARE in the scan result.
+   e. For conflicting schemas (same name): prefer the newly generated version.
+   f. Use the merged result as the content to write.
+3. **If NOT EXISTS (create mode)**: use the generated content as-is.
+
 ## Phase 4: Write the file
 
 Write to `packages/<package-name>/asyncapi/socket.yaml`

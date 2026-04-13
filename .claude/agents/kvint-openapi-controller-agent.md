@@ -50,9 +50,13 @@ If `$ARGUMENTS` is empty or only one argument is provided — stop: `❌ Обя�
    - Replace all non-alphanumeric characters with `-`
    - Examples: `chats.controller.ts` → `chats-controller`, `chats_router.py` → `chats-router`
 6. For each controller (in order), check:
-   - Does `packages/{packageName}/openapi/partials/{filename}.yaml` exist? → **already done**, skip
    - Does `packages/{packageName}/openapi/partials/{filename}.claim` exist? → **claimed by another agent**, skip
-7. The first controller without either file is the **target**
+   - Does `packages/{packageName}/openapi/partials/{filename}.yaml` exist?
+     - If yes: compare its modification time against the scan JSON file (`jsonPath`) modification time.
+       - If the **partial is newer** than the scan JSON → **already up to date**, skip.
+       - If the **partial is older** than the scan JSON → **stale**, treat as not done (will regenerate).
+     - If no: treat as not done.
+7. The first controller that is not done and not claimed is the **target**
 8. **Immediately** write `packages/{packageName}/openapi/partials/{filename}.claim` with content:
    ```
    claimed

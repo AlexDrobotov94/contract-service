@@ -82,6 +82,23 @@ After merging, verify:
 
 If critical validation fails, report the issues clearly before writing the file.
 
+## Pre-write check (update mode)
+
+Before writing the final merged document:
+
+1. Check if `packages/<service-name>/openapi/openapi.yaml` already exists.
+2. **If EXISTS (update mode)**:
+   a. Read the existing file — treat it as the **base document**.
+   b. Apply the merged partials result as an **overlay** on top of the base:
+      - New paths (not in base) → add.
+      - Existing paths (in base AND in merge result) → replace the entire path item with the merged version (it reflects current source code).
+      - Paths present in base but **absent from all partials** → preserve (likely manually added).
+      - New `components/schemas` → add.
+      - Existing schemas: replace with merged version if the schema name appears in any partial; otherwise keep the base version.
+      - Preserve from base: all `x-*` extension fields at any level, non-empty `description` fields not present in the merged result, `externalDocs`.
+   c. The result of the overlay is the final document to write.
+3. **If NOT EXISTS (create mode)**: write the merged result as-is.
+
 ## Output
 
 1. Write the merged OpenAPI document as **YAML** to `packages/<service-name>/openapi/openapi.yaml` (create directory if needed)
