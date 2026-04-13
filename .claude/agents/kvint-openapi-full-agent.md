@@ -294,6 +294,25 @@ Add generation comment at the top of the file:
 
 ---
 
+## Phase 5.5: Update service.yaml
+
+After successfully writing `packages/{packageName}/openapi/openapi.yaml`, update the contract package metadata:
+
+1. Read `packages/{packageName}/metadata/service.yaml`
+2. Parse the YAML
+3. If `contracts` key is missing or null → treat it as an empty array
+4. Check if an entry with `protocol: http` already exists in the array
+5. If it does **not** exist → append:
+   ```yaml
+   - protocol: http
+     path: openapi/openapi.yaml
+   ```
+6. Write the updated `service.yaml` back to the file (preserve all other fields and formatting)
+
+If `service.yaml` does not exist yet — skip silently (it may be created later).
+
+---
+
 ## Phase 6: Report
 
 ```

@@ -184,9 +184,21 @@ components:
    f. Use the merged result as the content to write.
 3. **If NOT EXISTS (create mode)**: use the generated content as-is.
 
-## Phase 4: Write the file
+## Phase 4: Write the file and update service.yaml
 
-Write to `packages/<package-name>/asyncapi/websocket.yaml`
+1. Write to `packages/<package-name>/asyncapi/websocket.yaml`
+
+2. After successful write, update `packages/<package-name>/metadata/service.yaml`:
+   - Read the file
+   - If `contracts` key is missing or null → treat as empty array
+   - Check if an entry with `protocol: websocket` already exists
+   - If not → append:
+     ```yaml
+     - protocol: websocket
+       path: asyncapi/websocket.yaml
+     ```
+   - Write the updated `service.yaml` back (preserve all other fields and formatting)
+   - If `service.yaml` does not exist yet — skip silently
 
 ## AsyncAPI 3.1.x Rules
 
@@ -252,7 +264,7 @@ After writing, output:
 3. Number of receive operations (client→server)
 4. Number of send operations (server→client)
 5. Any events that were ambiguous or required assumptions
-6. Reminder: добавить запись `protocol: websocket, path: asyncapi/websocket.yaml` в `service.yaml` этого пакета, если её там ещё нет
+6. Статус обновления `service.yaml`: добавлена запись `protocol: websocket` / уже была / пропущено (файл не найден)
 
 > **Язык документации**: все `description`, `summary`, `title` и другие текстовые поля в генерируемом YAML должны быть написаны **на русском языке**.
 

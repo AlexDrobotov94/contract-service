@@ -107,6 +107,25 @@ Before writing the final merged document:
 4. Order `paths` alphabetically by path string
 5. Order `components.*` keys alphabetically
 
+## Update service.yaml
+
+After successfully writing the merged `packages/<service-name>/openapi/openapi.yaml`, update the contract package metadata:
+
+1. Read `packages/<service-name>/metadata/service.yaml`
+2. Parse the YAML
+3. If `contracts` key is missing or null → treat it as an empty array
+4. Check if an entry with `protocol: http` already exists in the array
+5. If it does **not** exist → append:
+   ```yaml
+   - protocol: http
+     path: openapi/openapi.yaml
+   ```
+6. Write the updated `service.yaml` back (preserve all other fields and formatting)
+
+If `service.yaml` does not exist yet — skip silently.
+
+---
+
 ## Conflict & Warning Reporting
 
 After writing the file, produce a concise merge report:

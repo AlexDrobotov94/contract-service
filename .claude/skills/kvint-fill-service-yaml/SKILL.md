@@ -116,40 +116,6 @@ description: >
 
 Спроси: «Укажи доменную область внутри системы (например: chat, billing, auth)»
 
-### contracts
-
-Автоматически вставь в файл HTTP-контракт по умолчанию:
-
-```yaml
-contracts:
-  - protocol: http
-    path: openapi/openapi.yaml
-```
-
-Если сервис использует asyncapi-транспорты — добавь отдельную запись на каждый.
-Каждый транспорт — самостоятельный файл, без слияния.
-
-Пути фиксированы по протоколу и не переопределяются пользователем:
-
-- `http` → `openapi/openapi.yaml`
-- `rabbitmq` → `asyncapi/rabbitmq.yaml` (RabbitMQ/AMQP)
-- `socket` → `asyncapi/socket.yaml` (Socket.IO)
-- `websocket` → `asyncapi/websocket.yaml` (native WebSocket, ws library)
-
-Пример с несколькими транспортами:
-
-```yaml
-contracts:
-  - protocol: http
-    path: openapi/openapi.yaml
-  - protocol: socket
-    path: asyncapi/socket.yaml
-  - protocol: websocket
-    path: asyncapi/websocket.yaml
-  - protocol: rabbitmq
-    path: asyncapi/rabbitmq.yaml
-```
-
 ---
 
 ## Шаг 5: Необязательные поля
@@ -244,8 +210,8 @@ contracts:
 - `tags` — `[]`
 - `source` — не включай блок в файл
 - `links` — `[]`
+- `contracts` — `[]` (записи добавляются автоматически агентами-генераторами)
 - `dependsOn` — `[]`
-- contract `description` — `""`
 
 **Структура файла** (порядок полей строго такой):
 
@@ -277,10 +243,7 @@ links:
     title: { title }
     icon: { icon }
 
-contracts:
-  - protocol: { protocol }
-    path: { path }
-    description: "{description}"
+contracts: []
 
 dependsOn:
   - service: { serviceRef }
@@ -308,7 +271,6 @@ owner:     {owner}
 lifecycle: {lifecycle}
 system:    {system}
 domain:    {domain}
-contracts: {count} контракт(а/ов)
 ```
 
 Если ID не был в реестре — повтори предупреждение: «Не забудь зарегистрировать `{id}` в `tooling/schemas/services.schema.json`»

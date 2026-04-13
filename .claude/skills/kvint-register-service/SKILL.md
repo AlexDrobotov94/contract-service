@@ -11,33 +11,69 @@ This skill registers a service in the kvint monorepo: pulls the latest code and 
 
 Веди весь диалог с пользователем **на русском языке**: вопросы, подтверждения, сообщения об ошибках, итоговый вывод — всё на русском.
 
-## Steps
+## Шаги
 
-### 1. Gather inputs
+### Шаг 1. Сбор данных
 
-Ask the user two questions (you can ask both at once):
+Задай пользователю два вопроса (можно сразу оба):
 
-1. **Service name** — the human-readable name for the service being registered (e.g. `chat-service`)
-2. **Folder path** — the folder containing the service repo. It must be a sibling of the current working directory (i.e. at the same level as `contract-service`). Accept either a full absolute path or just the folder name (in which case resolve it relative to the parent of the current working directory).
+1. **Слаг сервиса** — короткое техническое имя сервиса (например `chat-service`). Именно он станет основой имени пакета контрактов (`packages/chat-contracts`).
+2. **Путь к папке** — папка с клонированным репозиторием сервиса. Должна быть на том же уровне, что и `contract-service`. Принимается абсолютный путь или просто имя папки (тогда путь строится как `<родительская папка cwd>/<имя папки>`).
 
-### 2. Resolve and validate the path
+### Шаг 2. Валидация пути
 
-- If only a folder name was given, construct the absolute path as: `<parent of cwd>/<folder-name>`
-- Verify the folder exists. If it doesn't, tell the user and stop.
-- Verify it's a git repository (check for `.git` directory). If it isn't, tell the user and stop.
+- Если передано только имя папки — строй абсолютный путь: `<родительская папка cwd>/<имя папки>`
+- Проверь, что папка существует. Если нет — сообщи и остановись.
+- Проверь наличие `.git` внутри. Если нет — сообщи и остановись.
 
-### 3. Scaffold the contract package
+### Шаг 3. Скаффолдинг пакета контрактов
 
-Invoke the `kvint-contract-scaffolder` subagent, passing the service name and resolved folder path as arguments. Wait for the subagent to complete before proceeding.
+Запусти агент `kvint-contract-scaffolder`, передав слаг сервиса как аргумент.
 
-**Important:** do not answer any questions that the subagent asks the user. All clarifying questions from the subagent must be handled directly by the user — your role here is only to launch the subagent and wait for it to finish.
+Жди завершения агента перед переходом к следующему шагу.
 
-### 4. Fill in service metadata
+### Шаг 4. Заполнение метаданных сервиса
 
-After the scaffolder completes, invoke the `kvint-fill-service-yaml` skill to interactively fill in `metadata/service.yaml` for the newly created package.
+Запусти агент `kvint-service-yaml-runner`, передав путь к пакету контрактов: `packages/<slug>-contracts`.
 
-**Important:** do not answer any questions that the skill asks the user. All clarifying questions from the skill must be handled directly by the user — your role here is only to invoke the skill and wait for it to finish.
+Жди завершения агента перед переходом к следующему шагу.
 
-## Rule: never answer on behalf of sub-agents or sub-skills
+### Шаг 5. Подготовка репозитория сервиса
 
-When you invoke any subagent or sub-skill as part of this registration flow, **do not intercept or answer their questions yourself**. If a subagent or skill asks the user something, stay silent and let the user respond directly. You are an orchestrator — your job is to pass control, wait, and proceed to the next step once the previous one is done.
+Запусти агент `kvint-prepare-project`, передав абсолютный путь к папке сервиса (из Шага 2).
+
+Из вывода агента извлеки `appPath` — это **последняя строка** вывода агента (только путь, без другого текста).
+
+Жди завершения агента перед переходом к следующему шагу.
+
+### Шаг 6. Сканирование транспортов
+
+Запусти агент `kvint-scan-transport`, передав `appPath` (из Шага 5) как аргумент.
+
+Из вывода агента извлеки путь к созданному scan-файлу — он находится в `.agent-workspace/transport-scan.<timestamp>.json`.
+
+Жди завершения агента перед переходом к следующему шагу.
+
+### Шаг 7. Генерация OpenAPI
+
+Запусти скилл `kvint-generate-openapi`, передав в контексте:
+- путь к scan-файлу (из Шага 6)
+- имя пакета: `<slug>-contracts`
+
+Жди завершения скилла перед переходом к следующему шагу.
+
+### Шаг 8. Генерация AsyncAPI
+
+Запусти скилл `kvint-generate-asyncapi`, передав в контексте:
+- путь к scan-файлу (из Шага 6)
+- имя пакета: `<slug>-contracts`
+
+Жди завершения скилла.
+
+---
+
+## Правило: не отвечать за вложенные агенты и скиллы
+
+При запуске любого агента или скилла в рамках этого флоу **не перехватывай и не отвечай на их вопросы сам**. Если агент или скилл задаёт пользователю вопрос — молчи и жди, пока пользователь ответит напрямую. Ты координатор: твоя задача — передать управление, дождаться завершения и перейти к следующему шагу.
+
+Единственные «решения», которые ты принимаешь: извлечь `appPath` из вывода `kvint-prepare-project` и путь scan-файла из вывода `kvint-scan-transport`, и передать их следующим шагам.

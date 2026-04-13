@@ -214,14 +214,28 @@ After drafting the YAML content but **before writing the file**:
 - **Fanout exchanges**: Omit routing key from channel address; note in description that all bound queues receive the message.
 - **Existing rabbitmq.yaml**: Read the current file first, then apply minimal diff to preserve existing definitions.
 
-## Phase 4: Write and report
+## Phase 4: Write, update service.yaml and report
 
-Write to `packages/<package-name>/asyncapi/rabbitmq.yaml`, then report:
-1. Path of the written file
-2. List of channels
-3. List of operations (action + summary)
-4. List of message schemas
-5. Reminder: добавить запись `protocol: rabbitmq, path: asyncapi/rabbitmq.yaml` в `service.yaml` этого пакета, если её там ещё нет
+1. Write to `packages/<package-name>/asyncapi/rabbitmq.yaml`
+
+2. After successful write, update `packages/<package-name>/metadata/service.yaml`:
+   - Read the file
+   - If `contracts` key is missing or null → treat as empty array
+   - Check if an entry with `protocol: rabbitmq` already exists
+   - If not → append:
+     ```yaml
+     - protocol: rabbitmq
+       path: asyncapi/rabbitmq.yaml
+     ```
+   - Write the updated `service.yaml` back (preserve all other fields and formatting)
+   - If `service.yaml` does not exist yet — skip silently
+
+3. Report:
+   - Path of the written file
+   - List of channels
+   - List of operations (action + summary)
+   - List of message schemas
+   - Статус обновления `service.yaml`: добавлена запись `protocol: rabbitmq` / уже была / пропущено (файл не найден)
 
 > **Язык документации**: все `description`, `summary`, `title` и другие текстовые поля в генерируемом YAML должны быть написаны **на русском языке**.
 
