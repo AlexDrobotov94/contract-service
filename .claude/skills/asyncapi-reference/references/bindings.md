@@ -218,6 +218,129 @@ operations:
 
 ---
 
+### Native WebSocket (ws library) особенности
+
+Нативный WebSocket использует **официальный AsyncAPI WebSocket binding** (`ws`). В отличие от Socket.IO, здесь нет неймспейсов и нативного ack-паттерна. Сообщения обычно содержат поле-дискриминатор `type` и поле `payload`.
+
+```yaml
+# Нативный WebSocket — паттерн с полем type
+
+asyncapi: 3.1.0
+info:
+  title: Orders Service WebSocket API
+  version: 1.0.0
+
+servers:
+  development:
+    host: localhost:8080
+    protocol: ws
+    pathname: /ws
+    description: Development server
+
+channels:
+  # Каждый тип сообщения = отдельный канал
+  # Адрес = значение поля type в сообщении
+  createOrder:
+    address: createOrder
+    description: Клиент создаёт новый заказ
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      createOrder:
+        $ref: "#/components/messages/CreateOrder"
+
+  orderUpdated:
+    address: orderUpdated
+    description: Сервер уведомляет об обновлении заказа
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      orderUpdated:
+        $ref: "#/components/messages/OrderUpdated"
+
+operations:
+  onCreateOrder:
+    action: receive
+    channel:
+      $ref: "#/channels/createOrder"
+    messages:
+      - $ref: "#/channels/createOrder/messages/createOrder"
+
+  sendOrderUpdated:
+    action: send
+    channel:
+      $ref: "#/channels/orderUpdated"
+    messages:
+      - $ref: "#/channels/orderUpdated/messages/orderUpdated"
+
+components:
+  messages:
+    CreateOrder:
+      name: CreateOrder
+      title: Создать заказ
+      summary: Клиент отправляет данные нового заказа
+      payload:
+        $ref: "#/components/schemas/CreateOrderPayload"
+
+    OrderUpdated:
+      name: OrderUpdated
+      title: Заказ обновлён
+      summary: Сервер уведомляет клиента об изменении статуса заказа
+      payload:
+        $ref: "#/components/schemas/OrderUpdatedPayload"
+
+  schemas:
+    CreateOrderPayload:
+      type: object
+      properties:
+        type:
+          type: string
+          const: createOrder
+        payload:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                type: string
+          required:
+            - items
+      required:
+        - type
+        - payload
+
+    OrderUpdatedPayload:
+      type: object
+      properties:
+        type:
+          type: string
+          const: orderUpdated
+        payload:
+          type: object
+          properties:
+            orderId:
+              type: string
+            status:
+              type: string
+          required:
+            - orderId
+            - status
+      required:
+        - type
+        - payload
+```
+
+**Ключевые отличия от Socket.IO:**
+- `protocol: ws` в servers (не `socketio`)
+- Официальный `ws` binding на уровне channel — `bindings.ws.bindingVersion: "0.1.0"`
+- Нет неймспейсов
+- Нет ackType — acknowledgement моделируется как отдельный outbound-канал если нужен
+- Адрес канала = значение поля `type` в JSON-сообщении (конвенция ws-сервисов в проекте)
+
+---
+
 ## HTTP Bindings
 
 Версия биндинга: `0.3.0`

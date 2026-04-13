@@ -11,6 +11,7 @@ const columnHelper = createColumnHelper<ContractRow>();
 function resolveHref(row: ContractRow): string | null {
   if (row.protocol === "http") return ROUTES.contractHttpService(row.serviceId);
   if (row.protocol === "socket") return ROUTES.contractSocketService(row.serviceId);
+  if (row.protocol === "websocket") return ROUTES.contractWebsocketService(row.serviceId);
   if (row.protocol === "rabbitmq") return ROUTES.contractRabbitmqService(row.serviceId);
   return null;
 }

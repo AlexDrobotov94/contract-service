@@ -216,9 +216,15 @@ WebSocket gateway: /orders  (socket.io, port 3001)
 
 Contract path convention for `metadata/service.yaml`:
 ```yaml
+# Socket.IO (library: socket.io):
 contracts:
   - protocol: socket
     path: asyncapi/socket.yaml
+
+# Native WebSocket (library: ws):
+contracts:
+  - protocol: websocket
+    path: asyncapi/websocket.yaml
 ```
 
 ---

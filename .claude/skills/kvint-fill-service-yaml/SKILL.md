@@ -134,6 +134,7 @@ contracts:
 - `http` → `openapi/openapi.yaml`
 - `rabbitmq` → `asyncapi/rabbitmq.yaml` (RabbitMQ/AMQP)
 - `socket` → `asyncapi/socket.yaml` (Socket.IO)
+- `websocket` → `asyncapi/websocket.yaml` (native WebSocket, ws library)
 
 Пример с несколькими транспортами:
 
@@ -143,6 +144,8 @@ contracts:
     path: openapi/openapi.yaml
   - protocol: socket
     path: asyncapi/socket.yaml
+  - protocol: websocket
+    path: asyncapi/websocket.yaml
   - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
 ```
