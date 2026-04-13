@@ -1,8 +1,0 @@
-{
-  "name": "@kvint/chat-service-old-contracts",
-  "version": "1.0.0",
-  "description": "Контракты chat-service-old",
-  "private": true,
-  "contracts": true,
-  "license": "ISC"
-}
