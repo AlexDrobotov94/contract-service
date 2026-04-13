@@ -28,14 +28,18 @@ color: purple
 
 ## Формат входных данных
 
-`$ARGUMENTS` содержит: `<projectPath> [<branch>]`
+`$ARGUMENTS` содержит: `<projectPath> [<branch>] [--install-deps]`
 
 Примеры:
 - `/tmp/my-service` — только путь
 - `/tmp/my-service develop` — путь + ветка
 - `/tmp/my-service feature/new-api` — путь + ветка со слэшем
+- `/tmp/my-service develop --install-deps` — принудительная установка зависимостей (актуально для Go)
 
-Правило парсинга: первый токен — путь, всё после первого пробела — название ветки (опционально).
+Правило парсинга:
+- Первый токен — путь
+- Если среди токенов есть `--install-deps` — запомни флаг `installDeps = true` и убери его из строки
+- Всё оставшееся после первого пробела — название ветки (опционально)
 
 ---
 
@@ -85,13 +89,16 @@ cd "<projectPath>" && git checkout <branch>
 
 Проверь наличие файлов-маркеров в `projectPath` (сначала корень, потом первый уровень вложенности):
 
-| Файл | Язык |
-|------|------|
-| `package.json` | Node.js |
-| `go.mod` | Go |
-| `pyproject.toml` / `requirements.txt` / `setup.py` | Python |
-| `pom.xml` / `build.gradle` | Java |
-| `Cargo.toml` | Rust |
+| Файл | Язык | Уточнение фреймворка |
+|------|------|----------------------|
+| `package.json` | Node.js | — |
+| `nest-cli.json` | Node.js | → NestJS |
+| `go.mod` / `go.work` | Go | — |
+| `pyproject.toml` / `requirements.txt` / `setup.py` / `Pipfile` | Python | — |
+| `pom.xml` / `build.gradle` | Java | — |
+| `Cargo.toml` | Rust | — |
+
+Если найден `nest-cli.json` — запомни `framework = NestJS` (используется в Фазах 4 и 5).
 
 Если язык не распознан — добавь предупреждение и продолжай.
 
@@ -99,11 +106,14 @@ cd "<projectPath>" && git checkout <branch>
 
 ## Фаза 4: Определение монорепо
 
-**Node.js:**
+**Node.js (NestJS):**
+Если `framework = NestJS` — прочитай `nest-cli.json`. Если в нём `"monorepo": true` → монорепо NestJS. Запомни содержимое `nest-cli.json` для Фазы 5.
+
+**Node.js (прочие):**
 Проверь `package.json` на поле `"workspaces"`. Также ищи: `turbo.json`, `nx.json`, `lerna.json`, `pnpm-workspace.yaml`.
 
 **Go:**
-Посчитай количество `go.mod` файлов до глубины 3. Если больше 1 → монорепо.
+Сначала проверь наличие `go.work` в корне — если есть, это Go workspace (монорепо). Иначе посчитай `go.mod` файлы до глубины 3: если больше 1 → монорепо.
 
 **Python:**
 Посчитай `pyproject.toml` или `setup.py` до глубины 3. Если больше 1 → монорепо.
@@ -114,12 +124,25 @@ cd "<projectPath>" && git checkout <branch>
 
 ## Фаза 5: Поиск целевого приложения (только для монорепо)
 
+**NestJS монорепо (framework = NestJS и monorepo: true):**
+Прочитай поле `projects` из `nest-cli.json`. Каждый проект содержит `root` — относительный путь от корня репозитория. Выбери проект с типом `application` (не `library`). Если несколько — предпочти тот, чьё имя совпадает с именем репозитория, иначе первый по алфавиту и перечисли остальные в предупреждении. `appPath = projectPath + "/" + project.root`.
+
+**Прочие монорепо:**
 Ищи директорию приложения в следующем порядке:
 
-1. `apps/` — перебери поддиректории, выбери ту, в которой есть точка входа: `main.ts`, `index.ts`, `main.go`, `main.py`, `app.py`
+1. `apps/` — перебери поддиректории, выбери ту, в которой есть точка входа (см. таблицу ниже)
 2. `packages/` — та же логика
 3. `src/` — если есть и содержит файлы точек входа
 4. Корень — если в нём есть точка входа, несмотря на монорепо
+
+**Точки входа по языку:**
+
+| Язык | Файлы точек входа |
+|------|-------------------|
+| Node.js / NestJS | `src/main.ts`, `main.ts`, `index.ts` |
+| Node.js / Express | `src/server.ts`, `src/app.ts`, `src/index.ts`, `server.ts`, `app.ts`, `index.ts` |
+| Go | `main.go`, `cmd/*/main.go` |
+| Python | `main.py`, `app.py`, `manage.py` (Django), `wsgi.py`, `asgi.py` |
 
 **Правила выбора:**
 - Предпочитай директории, названные по имени репозитория
@@ -132,33 +155,75 @@ cd "<projectPath>" && git checkout <branch>
 
 ## Фаза 6: Установка зависимостей
 
-Выполни в нужной директории:
+Поведение зависит от языка. Не все языки требуют установки зависимостей для статического сканирования.
 
-**Node.js:**
-1. Определи пакетный менеджер:
+---
+
+### Node.js — устанавливай всегда
+
+Без `npm install` TypeScript-агенты не смогут раскрыть типы DTO из внешних пакетов.
+
+1. Определи пакетный менеджер по lock-файлу в корне (`projectPath`):
    - `pnpm-lock.yaml` → `pnpm install`
    - `yarn.lock` → `yarn install --frozen-lockfile`
    - `package-lock.json` или ничего → `npm install`
 2. Для монорепо: запускай install из корня `projectPath`, а не из `appPath`
 
-**Go:**
-```bash
-cd "<appPath>" && go mod download
+---
+
+### Go — пропускай по умолчанию
+
+Go-проекты почти всегда определяют struct-типы локально. Установка зависимостей для статического сканирования файлов не нужна.
+
+**Пропусти этот шаг** и выведи информационное сообщение:
+```
+ℹ️  Go: установка зависимостей пропущена.
+   Статическое сканирование читает .go файлы напрямую — go mod download не требуется.
+   Если сканер не может разрешить типы из внешних модулей, запустите агент повторно с флагом --install-deps.
 ```
 
-**Python:**
-1. `pyproject.toml` → `pip install -e .`
-2. `requirements.txt` → `pip install -r requirements.txt`
-3. `requirements/` директория → `pip install -r requirements/base.txt` (или `common.txt`)
+**Исключение** — устанавливай зависимости если в `$ARGUMENTS` передан флаг `--install-deps`:
+- Go workspace: `cd "<projectPath>" && go work sync`
+- Обычный модуль: `cd "<appPath>" && go mod download`
 
-**Java:**
+---
+
+### Python — предупреждай, затем устанавливай
+
+Pydantic/dataclass модели обычно живут в том же репозитории и читаются без установки. Установка нужна только если DTO-типы приходят из закрытых внешних пакетов.
+
+Выведи предупреждение перед установкой:
+```
+⚠️  Python: зависимости будут установлены.
+   Обычно это не требуется — модели Pydantic/dataclass читаются напрямую из исходников.
+   Установка нужна только если типы импортируются из внешних закрытых пакетов.
+```
+
+Затем определи менеджер по lock-файлам и конфигам в `appPath` (или `projectPath` для монорепо) в порядке приоритета:
+
+| Файл | Команда |
+|------|---------|
+| `uv.lock` | `uv sync` |
+| `poetry.lock` | `poetry install --no-root` |
+| `Pipfile.lock` / `Pipfile` | `pipenv install` |
+| `pyproject.toml` (без poetry/uv) | `pip install -e .` |
+| `requirements.txt` | `pip install -r requirements.txt` |
+| `requirements/` директория | `pip install -r requirements/base.txt` (fallback: `common.txt`, `dev.txt`) |
+
+---
+
+### Java — устанавливай всегда
+
 - Maven: `mvn dependency:resolve -q`
 - Gradle: `./gradlew dependencies --quiet`
 
-**Rust:**
+### Rust — устанавливай всегда
+
 ```bash
 cd "<appPath>" && cargo fetch
 ```
+
+---
 
 Если установка завершилась с ошибкой — остановись и выведи полный вывод ошибки.
 
@@ -171,12 +236,14 @@ cd "<appPath>" && cargo fetch
 ```
 ✅ Проект подготовлен
 
-projectPath:    <абсолютный путь к корню репозитория>
-appPath:        <абсолютный путь к приложению>
-язык:           <Node.js | Go | Python | Java | Rust | неизвестен>
-пакетный менеджер: <npm | yarn | pnpm | go | pip | maven | gradle | cargo | —>
-монорепо:       <да | нет>
-ветка:          <текущее название ветки>
+projectPath:       <абсолютный путь к корню репозитория>
+appPath:           <абсолютный путь к приложению>
+язык:              <Node.js | Go | Python | Java | Rust | неизвестен>
+фреймворк:         <NestJS | Express | Django | — | неизвестен>
+пакетный менеджер: <npm | yarn | pnpm | uv | poetry | pipenv | pip | go | maven | gradle | cargo | —>
+зависимости:       <установлены | пропущено (Go) | пропущено (--install-deps не передан)>
+монорепо:          <да | нет>
+ветка:             <текущее название ветки>
 
 <appPath>
 ```

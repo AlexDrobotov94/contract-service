@@ -41,16 +41,17 @@ Traverse files, using only the relevant sections of the skill for each transport
 
 **Гранулярность: одна `TransportEntry` = одна операция.** Не создавай одну запись на контроллер или класс-потребитель. Заполняй поле `endpoint` согласно типам из `tooling/types/transport-scan.ts`.
 
-| Транспорт | Единица записи | symbol.kind | Пример symbol.name |
-|-----------|---------------|-------------|---------------------|
-| HTTP | метод-обработчик (`@Get`, `@Post`, …) | `"method"` | `"getUser"` |
-| Messaging | метод с `@MessagePattern` / `@EventPattern` / `@RabbitSubscribe` / `@Process` | `"method"` | `"handleOrderCreated"` |
-| gRPC | RPC-метод из `.proto` файла | `"method"` | `"GetOrder"` |
-| GraphQL | resolver-метод (`@Query` / `@Mutation` / `@Subscription`) | `"method"` | `"createOrder"` |
-| WebSocket inbound | метод с `@SubscribeMessage` | `"method"` | `"handleCreateOrder"` |
-| WebSocket outbound | метод, где вызывается `server.emit()` / `client.emit()` | `"method"` | `"notifyOrderUpdated"` |
+| Транспорт          | Единица записи                                                                | symbol.kind | Пример symbol.name     |
+| ------------------ | ----------------------------------------------------------------------------- | ----------- | ---------------------- |
+| HTTP               | метод-обработчик (`@Get`, `@Post`, …)                                         | `"method"`  | `"getUser"`            |
+| Messaging          | метод с `@MessagePattern` / `@EventPattern` / `@RabbitSubscribe` / `@Process` | `"method"`  | `"handleOrderCreated"` |
+| gRPC               | RPC-метод из `.proto` файла                                                   | `"method"`  | `"GetOrder"`           |
+| GraphQL            | resolver-метод (`@Query` / `@Mutation` / `@Subscription`)                     | `"method"`  | `"createOrder"`        |
+| WebSocket inbound  | метод с `@SubscribeMessage`                                                   | `"method"`  | `"handleCreateOrder"`  |
+| WebSocket outbound | метод, где вызывается `server.emit()` / `client.emit()`                       | `"method"`  | `"notifyOrderUpdated"` |
 
 **Специальные случаи:**
+
 - HTTP: если контроллер имеет 3 route-метода — создаётся 3 `TransportEntry`. Для каждого вычисляй полный путь: `globalPrefix + controllerPrefix + methodPath`.
 - WebSocket outbound: для каждого уникального события (`server.emit('eventName', ...)`) в методе — одна запись с `direction: "outbound"`.
 - gRPC: источник истины — `.proto` файл. `symbol.file` = путь к `.proto`, `symbol.name` = имя RPC-метода.
