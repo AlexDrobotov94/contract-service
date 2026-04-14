@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../../../tooling/schemas/service.schema.json
+
+apiVersion: kvint/v1
+kind: component
+namespace: default
+id: chat-service
+name: Chat Service
+description: |
+  Сервис для тестирования реальных звонков через текстовый чат
+
+owner: group:default/team-chat
+lifecycle: experimental
+type: service
+
+system: chat
+domain: chat
+
+tags:
+  - nestjs
+
+source: https://gitlab.prod.kvint.io/kvint/web/chat-service
+
+links: []
+
+contracts:
+  - protocol: http
+    path: openapi/openapi.yaml
+  - protocol: socket
+    path: asyncapi/socket.yaml
+  - protocol: rabbitmq
+    path: asyncapi/rabbitmq.yaml
+
+dependsOn: []

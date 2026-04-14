@@ -20,20 +20,22 @@ Key source files:
 
 **Namespace**: all events belong to namespace `/chat`. Channel IDs in socket.yaml use `_` instead of `:` (e.g., `chat_join` for event `chat:join`). Channel `address` uses the original colon notation (`"chat:join"`).
 
-**Events inventory (scan 2026-03-29):**
+**Events inventory (scan 2026-04-13 — confirmed current):**
 
 Inbound (client → server):
-- `chat:join` — payload: ChatJoinPayload, ack: ChatJoinAck = Ack<{}>
-- `chat:leave` — payload: ChatLeavePayload, no ack
-- `message:send` — payload: MessageSendPayload, ack: MessageSendAck = Ack<MessageSendOk>
-- `processing:catchup` — payload: ProcessingCatchupRequest, ack: ProcessingCatchupAck = Ack<ProcessingCatchupOk>
+- `chat:join` — payload: ChatJoinPayload `{chatId: string, since?: any|null}`, ack: ChatJoinAck = Ack<{}>
+- `chat:leave` — payload: ChatLeavePayload `{chatId: string}`, no ack
+- `message:send` — payload: MessageSendPayload `{chatId, clientMessageId, text}`, ack: MessageSendAck = Ack<MessageSendOk>
+- `processing:catchup` — payload: ProcessingCatchupRequest `{chatId}`, ack: ProcessingCatchupAck = Ack<ProcessingCatchupOk>
 
 Outbound (server → client):
-- `timeline:catchup` — payload: TimelineCatchupEvent (sent on join, inside onJoin handler)
-- `chat:updated` — payload: ChatUpdatedEvent
-- `timeline:new` — payload: TimelineItem (discriminated union)
-- `processing:updated` — payload: MessageProcessing
-- `preview:new` — payload: PreviewNewEvent
+- `timeline:catchup` — payload: TimelineCatchupEvent `{chatId, stateVersion, items: TimelineItem[]}` (emitted inside onJoin handler)
+- `chat:updated` — payload: ChatUpdatedEvent `{chatId, stateVersion}`
+- `timeline:new` — payload: TimelineItem (oneOf: TimelineEventItem | TimelineMessageItem)
+- `processing:updated` — payload: MessageProcessing (full object with id, status enum, timestamps)
+- `preview:new` — payload: PreviewNewEvent `{chatId, sessionId, text}`
+
+**Note on `processing:catchup`**: this event appears in `ChatServerToClientEvents` as an outbound event too, but the 2026-04-13 scan only detected the inbound gateway handler — no outbound emit was found. The outbound variant is NOT in socket.yaml.
 
 **socket.yaml location**: `packages/chat-contracts/asyncapi/socket.yaml`
 

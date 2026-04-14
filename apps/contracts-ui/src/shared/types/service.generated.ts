@@ -19,7 +19,7 @@ export interface ServiceDescriptor {
   /**
    * Уникальный идентификатор сервиса. Должен быть зарегистрирован в services.schema.json.
    */
-  id: 'chat-service' | 'chat-service-old' | 'bff-service' | 'user-service' | 'payment-service';
+  id: 'chat-service';
   /**
    * Человекочитаемое название сервиса.
    */
@@ -112,12 +112,7 @@ export interface ServiceDescriptor {
    * Явные зависимости от других сервисов.
    */
   dependsOn?: {
-    service:
-      | 'component:default/chat-service'
-      | 'component:default/chat-service-old'
-      | 'component:default/bff-service'
-      | 'component:default/user-service'
-      | 'component:default/payment-service';
+    service: 'chat-service';
     /**
      * Тип зависимости: http — синхронный вызов, event/queue — асинхронный, socket — WebSocket.
      */

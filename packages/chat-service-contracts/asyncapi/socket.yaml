@@ -1,0 +1,662 @@
+asyncapi: "3.1.0"
+info:
+  title: Chat Service Socket.IO API
+  version: "1.0.0"
+  description: |
+    Контракт Socket.IO событий сервиса чатов (chat-service).
+    Все события работают в неймспейсе /chat.
+    Входящие события (клиент → сервер) помечены action: receive,
+    исходящие (сервер → клиент) — action: send.
+
+defaultContentType: application/json
+
+servers:
+  development:
+    host: localhost:3000
+    protocol: ws
+    pathname: /socket.io
+    description: Development сервер (неймспейс /chat)
+
+channels:
+  chat_join:
+    address: "chat:join"
+    description: Клиент подключается к комнате чата и получает синхронизацию таймлайна.
+    messages:
+      chat_joinMessage:
+        $ref: "#/components/messages/ChatJoinMessage"
+
+  chat_leave:
+    address: "chat:leave"
+    description: Клиент покидает комнату чата.
+    messages:
+      chat_leaveMessage:
+        $ref: "#/components/messages/ChatLeaveMessage"
+
+  chat_updated:
+    address: "chat:updated"
+    description: Сервер уведомляет подписчиков об изменении состояния чата.
+    messages:
+      chat_updatedMessage:
+        $ref: "#/components/messages/ChatUpdatedMessage"
+
+  message_send:
+    address: "message:send"
+    description: Клиент отправляет текстовое сообщение в чат.
+    messages:
+      message_sendMessage:
+        $ref: "#/components/messages/MessageSendMessage"
+
+  timeline_catchup:
+    address: "timeline:catchup"
+    description: Сервер отправляет текущее состояние таймлайна после подключения клиента к комнате.
+    messages:
+      timeline_catchupMessage:
+        $ref: "#/components/messages/TimelineCatchupMessage"
+
+  timeline_new:
+    address: "timeline:new"
+    description: Сервер отправляет новый элемент таймлайна в реальном времени.
+    messages:
+      timeline_newMessage:
+        $ref: "#/components/messages/TimelineNewMessage"
+
+  processing_catchup:
+    address: "processing:catchup"
+    description: Клиент запрашивает текущее состояние обработки сообщений для чата.
+    messages:
+      processing_catchupMessage:
+        $ref: "#/components/messages/ProcessingCatchupMessage"
+
+  processing_updated:
+    address: "processing:updated"
+    description: Сервер уведомляет об изменении статуса обработки сообщения.
+    messages:
+      processing_updatedMessage:
+        $ref: "#/components/messages/ProcessingUpdatedMessage"
+
+  preview_new:
+    address: "preview:new"
+    description: Сервер стримит новый фрагмент ответа бота в режиме предпросмотра.
+    messages:
+      preview_newMessage:
+        $ref: "#/components/messages/PreviewNewMessage"
+
+operations:
+  chatJoinReceive:
+    action: receive
+    summary: Клиент входит в чат
+    tags:
+      - name: Чат
+    channel:
+      $ref: "#/channels/chat_join"
+    messages:
+      - $ref: "#/channels/chat_join/messages/chat_joinMessage"
+
+  chatLeaveReceive:
+    action: receive
+    summary: Клиент выходит из чата
+    tags:
+      - name: Чат
+    channel:
+      $ref: "#/channels/chat_leave"
+    messages:
+      - $ref: "#/channels/chat_leave/messages/chat_leaveMessage"
+
+  chatUpdatedSend:
+    action: send
+    summary: Уведомление об изменении чата
+    tags:
+      - name: Чат
+    channel:
+      $ref: "#/channels/chat_updated"
+    messages:
+      - $ref: "#/channels/chat_updated/messages/chat_updatedMessage"
+
+  messageSendReceive:
+    action: receive
+    summary: Клиент отправляет сообщение
+    tags:
+      - name: Сообщения
+    channel:
+      $ref: "#/channels/message_send"
+    messages:
+      - $ref: "#/channels/message_send/messages/message_sendMessage"
+
+  timelineCatchupSend:
+    action: send
+    summary: Синхронизация таймлайна при подключении
+    tags:
+      - name: Таймлайн
+    channel:
+      $ref: "#/channels/timeline_catchup"
+    messages:
+      - $ref: "#/channels/timeline_catchup/messages/timeline_catchupMessage"
+
+  timelineNewSend:
+    action: send
+    summary: Новый элемент таймлайна
+    tags:
+      - name: Таймлайн
+    channel:
+      $ref: "#/channels/timeline_new"
+    messages:
+      - $ref: "#/channels/timeline_new/messages/timeline_newMessage"
+
+  processingCatchupReceive:
+    action: receive
+    summary: Клиент запрашивает состояние обработки
+    tags:
+      - name: Обработка
+    channel:
+      $ref: "#/channels/processing_catchup"
+    messages:
+      - $ref: "#/channels/processing_catchup/messages/processing_catchupMessage"
+
+  processingUpdatedSend:
+    action: send
+    summary: Обновление статуса обработки сообщения
+    tags:
+      - name: Обработка
+    channel:
+      $ref: "#/channels/processing_updated"
+    messages:
+      - $ref: "#/channels/processing_updated/messages/processing_updatedMessage"
+
+  previewNewSend:
+    action: send
+    summary: Новый фрагмент стриминга ответа
+    tags:
+      - name: Стриминг
+    channel:
+      $ref: "#/channels/preview_new"
+    messages:
+      - $ref: "#/channels/preview_new/messages/preview_newMessage"
+
+components:
+  messages:
+    ChatJoinMessage:
+      name: ChatJoinMessage
+      title: Вход в чат
+      summary: Клиент подключается к комнате чата. В ответ получает Ack с результатом операции.
+      payload:
+        $ref: "#/components/schemas/ChatJoinPayload"
+
+    ChatLeaveMessage:
+      name: ChatLeaveMessage
+      title: Выход из чата
+      summary: Клиент покидает комнату чата. Ответа не возвращается.
+      payload:
+        $ref: "#/components/schemas/ChatLeavePayload"
+
+    ChatUpdatedMessage:
+      name: ChatUpdatedMessage
+      title: Чат обновлён
+      summary: Сервер уведомляет о новой версии состояния чата (stateVersion увеличился).
+      payload:
+        $ref: "#/components/schemas/ChatUpdatedPayload"
+
+    MessageSendMessage:
+      name: MessageSendMessage
+      title: Отправка сообщения
+      summary: Клиент отправляет текстовое сообщение. В ответ получает Ack со статусом обработки.
+      payload:
+        $ref: "#/components/schemas/MessageSendPayload"
+
+    TimelineCatchupMessage:
+      name: TimelineCatchupMessage
+      title: Синхронизация таймлайна
+      summary: Сервер отправляет текущий снимок таймлайна сразу после входа клиента в комнату.
+      payload:
+        $ref: "#/components/schemas/TimelineCatchupPayload"
+
+    TimelineNewMessage:
+      name: TimelineNewMessage
+      title: Новый элемент таймлайна
+      summary: Сервер добавляет новый элемент в таймлайн чата в реальном времени.
+      payload:
+        $ref: "#/components/schemas/TimelineItemPayload"
+
+    ProcessingCatchupMessage:
+      name: ProcessingCatchupMessage
+      title: Синхронизация статусов обработки
+      summary: Клиент запрашивает все активные статусы обработки сообщений чата. В ответ получает Ack со списком.
+      payload:
+        $ref: "#/components/schemas/ProcessingCatchupRequestPayload"
+
+    ProcessingUpdatedMessage:
+      name: ProcessingUpdatedMessage
+      title: Статус обработки обновлён
+      summary: Сервер уведомляет об изменении статуса обработки конкретного сообщения.
+      payload:
+        $ref: "#/components/schemas/MessageProcessingPayload"
+
+    PreviewNewMessage:
+      name: PreviewNewMessage
+      title: Фрагмент предпросмотра ответа
+      summary: Сервер стримит часть генерируемого ответа бота до его финализации.
+      payload:
+        $ref: "#/components/schemas/PreviewNewPayload"
+
+  schemas:
+    # ── Входящие payload-ы ──────────────────────────────────────────────────
+
+    ChatJoinPayload:
+      type: object
+      description: Данные для входа клиента в комнату чата.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата (MongoDB ObjectId).
+        since:
+          description: Курсор синхронизации таймлайна (опционально, уточняется).
+          nullable: true
+      required:
+        - chatId
+
+    ChatLeavePayload:
+      type: object
+      description: Данные для выхода клиента из комнаты чата.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата (MongoDB ObjectId).
+      required:
+        - chatId
+
+    MessageSendPayload:
+      type: object
+      description: Данные сообщения, отправляемого клиентом в чат.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата (MongoDB ObjectId).
+        clientMessageId:
+          type: string
+          minLength: 1
+          description: Клиентский идентификатор сообщения (для идемпотентности).
+        text:
+          type: string
+          description: Текст сообщения.
+      required:
+        - chatId
+        - clientMessageId
+        - text
+
+    ProcessingCatchupRequestPayload:
+      type: object
+      description: Запрос синхронизации статусов обработки сообщений чата.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата (MongoDB ObjectId).
+      required:
+        - chatId
+
+    # ── Исходящие payload-ы ─────────────────────────────────────────────────
+
+    ChatUpdatedPayload:
+      type: object
+      description: Уведомление об изменении версии состояния чата.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата.
+        stateVersion:
+          type: number
+          description: Текущая версия состояния чата.
+      required:
+        - chatId
+        - stateVersion
+
+    TimelineCatchupPayload:
+      type: object
+      description: Снимок текущего состояния таймлайна для синхронизации клиента.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата.
+        stateVersion:
+          type: number
+          description: Версия состояния на момент снимка.
+        items:
+          type: array
+          description: Список элементов таймлайна (события и сообщения).
+          items:
+            $ref: "#/components/schemas/TimelineItemPayload"
+      required:
+        - chatId
+        - stateVersion
+        - items
+
+    TimelineItemPayload:
+      description: Элемент таймлайна — событие сессии или сообщение.
+      oneOf:
+        - $ref: "#/components/schemas/TimelineEventItem"
+        - $ref: "#/components/schemas/TimelineMessageItem"
+
+    TimelineEventItem:
+      type: object
+      description: Событие сессии в таймлайне (начало/завершение сессии).
+      properties:
+        kind:
+          type: string
+          enum:
+            - event
+          description: Дискриминатор типа элемента.
+        key:
+          type: string
+          minLength: 1
+          description: Уникальный ключ элемента.
+        chatId:
+          type: string
+          description: Идентификатор чата (MongoDB ObjectId).
+        sessionId:
+          type: string
+          description: Идентификатор сессии (UUID).
+        type:
+          type: string
+          enum:
+            - session.started
+            - session.ended
+          description: Тип события сессии.
+        occurredAt:
+          type: number
+          description: Время события (Unix timestamp).
+      required:
+        - kind
+        - key
+        - chatId
+        - sessionId
+        - type
+        - occurredAt
+
+    TimelineMessageItem:
+      type: object
+      description: Сообщение в таймлайне (реплика пользователя или бота).
+      properties:
+        kind:
+          type: string
+          enum:
+            - message
+          description: Дискриминатор типа элемента.
+        key:
+          type: string
+          minLength: 1
+          description: Уникальный ключ элемента.
+        chatId:
+          type: string
+          description: Идентификатор чата (MongoDB ObjectId).
+        sessionId:
+          type: string
+          description: Идентификатор сессии (UUID).
+        correlationId:
+          type: string
+          description: Идентификатор корреляции для связи с обработкой (UUID).
+        role:
+          type: string
+          enum:
+            - user
+            - bot
+          description: Роль автора сообщения.
+        sideIndex:
+          type: integer
+          enum:
+            - 0
+            - 1
+          description: Индекс стороны диалога (0 — пользователь, 1 — бот).
+        turnIndex:
+          type: integer
+          minimum: 0
+          description: Порядковый номер реплики в диалоге.
+        text:
+          type: string
+          description: Текст сообщения.
+        occurredAt:
+          type: number
+          nullable: true
+          description: Время сообщения (Unix timestamp). Может быть null для неподтверждённых сообщений.
+      required:
+        - kind
+        - key
+        - chatId
+        - sessionId
+        - correlationId
+        - role
+        - sideIndex
+        - turnIndex
+        - text
+
+    MessageProcessingPayload:
+      type: object
+      description: Статус обработки сообщения сервисом бота.
+      properties:
+        id:
+          type: string
+          description: Идентификатор записи обработки.
+        chatId:
+          type: string
+          description: Идентификатор чата (MongoDB ObjectId).
+        clientMessageId:
+          type: string
+          description: Клиентский идентификатор сообщения.
+        correlationId:
+          type: string
+          description: Идентификатор корреляции с запросом к боту (UUID). Опционально.
+        status:
+          type: string
+          enum:
+            - queued
+            - completed
+            - failed
+          description: "Статус обработки: queued — в очереди, completed — завершена, failed — ошибка."
+        attempt:
+          type: integer
+          minimum: 1
+          description: Номер попытки обработки.
+        version:
+          type: integer
+          minimum: 0
+          description: Версия записи обработки.
+        error:
+          $ref: "#/components/schemas/MessageProcessingError"
+        createdAt:
+          type: string
+          format: date-time
+          description: Время создания записи (ISO 8601).
+        updatedAt:
+          type: string
+          format: date-time
+          description: Время последнего обновления (ISO 8601).
+      required:
+        - id
+        - chatId
+        - clientMessageId
+        - status
+        - attempt
+        - version
+        - createdAt
+        - updatedAt
+
+    MessageProcessingError:
+      type: object
+      description: Описание ошибки обработки сообщения.
+      properties:
+        code:
+          type: string
+          minLength: 1
+          description: Код ошибки.
+        message:
+          type: string
+          minLength: 1
+          description: Описание ошибки (опционально).
+        details:
+          description: Дополнительные детали ошибки (произвольная структура).
+      required:
+        - code
+
+    PreviewNewPayload:
+      type: object
+      description: Фрагмент генерируемого ответа бота в режиме стриминга.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата.
+        sessionId:
+          type: string
+          description: Идентификатор сессии.
+        text:
+          type: string
+          description: Очередной фрагмент текста ответа бота.
+      required:
+        - chatId
+        - sessionId
+        - text
+
+    # ── Ack-обёртки ─────────────────────────────────────────────────────────
+
+    AckChatJoin:
+      description: Результат операции chat:join. Успех возвращает пустой объект, ошибка — ApiError.
+      oneOf:
+        - type: object
+          description: Успешный ответ на chat:join.
+          properties:
+            ok:
+              type: boolean
+              enum:
+                - true
+            data:
+              type: object
+              description: Пустой объект (операция выполнена успешно).
+              additionalProperties: false
+          required:
+            - ok
+            - data
+        - type: object
+          description: Ошибка операции chat:join.
+          properties:
+            ok:
+              type: boolean
+              enum:
+                - false
+            error:
+              $ref: "#/components/schemas/ApiError"
+          required:
+            - ok
+            - error
+
+    AckMessageSend:
+      description: Результат операции message:send. Успех содержит данные обработки, ошибка — ApiError.
+      oneOf:
+        - type: object
+          description: Успешный ответ на message:send.
+          properties:
+            ok:
+              type: boolean
+              enum:
+                - true
+            data:
+              $ref: "#/components/schemas/MessageSendOk"
+          required:
+            - ok
+            - data
+        - type: object
+          description: Ошибка операции message:send.
+          properties:
+            ok:
+              type: boolean
+              enum:
+                - false
+            error:
+              $ref: "#/components/schemas/ApiError"
+          required:
+            - ok
+            - error
+
+    AckProcessingCatchup:
+      description: Результат операции processing:catchup. Успех содержит список статусов, ошибка — ApiError.
+      oneOf:
+        - type: object
+          description: Успешный ответ на processing:catchup.
+          properties:
+            ok:
+              type: boolean
+              enum:
+                - true
+            data:
+              $ref: "#/components/schemas/ProcessingCatchupOk"
+          required:
+            - ok
+            - data
+        - type: object
+          description: Ошибка операции processing:catchup.
+          properties:
+            ok:
+              type: boolean
+              enum:
+                - false
+            error:
+              $ref: "#/components/schemas/ApiError"
+          required:
+            - ok
+            - error
+
+    MessageSendOk:
+      type: object
+      description: Данные успешного результата отправки сообщения.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата.
+        clientMessageId:
+          type: string
+          description: Клиентский идентификатор сообщения.
+        processing:
+          $ref: "#/components/schemas/MessageProcessingPayload"
+      required:
+        - chatId
+        - clientMessageId
+        - processing
+
+    ProcessingCatchupOk:
+      type: object
+      description: Данные успешного результата запроса синхронизации обработки.
+      properties:
+        chatId:
+          type: string
+          description: Идентификатор чата.
+        stateVersion:
+          type: number
+          description: Версия состояния на момент ответа.
+        items:
+          type: array
+          description: Список текущих статусов обработки сообщений.
+          items:
+            $ref: "#/components/schemas/MessageProcessingPayload"
+      required:
+        - chatId
+        - stateVersion
+        - items
+
+    ApiError:
+      type: object
+      description: Стандартная ошибка API. Возвращается в ack-ответах при неуспешном результате.
+      properties:
+        code:
+          type: string
+          enum:
+            - invalid_payload
+            - unauthorized
+            - forbidden
+            - not_found
+            - conflict
+            - too_many_requests
+            - internal_error
+          description: Машиночитаемый код ошибки.
+        message:
+          type: string
+          description: Читаемое описание ошибки.
+        details:
+          description: Дополнительные детали (произвольная структура).
+      required:
+        - code
+        - message

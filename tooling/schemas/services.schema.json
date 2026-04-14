@@ -4,11 +4,11 @@
   "definitions": {
     "serviceId": {
       "type": "string",
-      "enum": []
+      "enum": ["chat-service"]
     },
     "serviceRef": {
       "type": "string",
-      "enum": []
+      "enum": ["chat-service"]
     }
   }
 }

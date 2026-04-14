@@ -13,8 +13,11 @@ Chat-service uses a **request-reply pattern with direct queues** (no named excha
 
 **Published messages (send):**
 - `DialingTaskEnvelope` → `kv.dialer.rabbitmq`, pattern: `dialing_task`, correlationId = sessionId
+  - Uses PascalCase fields `Func`/`Data` (dialer protocol style) — NOT the standard envelopeShell
 - `HandleMessageRequestEnvelope` → `{instanceQueue}`, pattern: `handle_message`
+  - Uses standard envelopeShell + `data.req_params.func` + `data.func` + `data.session_id` + `data.message`
 - `CloseSessionRequestEnvelope` → `{instanceQueue}`, pattern: `close_session`
+  - Uses standard envelopeShell + `data.req_params.func` + `data.func` + `data.session_id` + `data.status`
 All outbound messages carry `replyTo: kv.chat-service.dev.replies`.
 
 **Consumed messages (receive):**
