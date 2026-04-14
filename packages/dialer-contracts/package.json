@@ -1,0 +1,8 @@
+{
+  "name": "@kvint/dialer-contracts",
+  "version": "1.0.0",
+  "description": "Контракты dialer-service",
+  "private": true,
+  "contracts": true,
+  "license": "ISC"
+}

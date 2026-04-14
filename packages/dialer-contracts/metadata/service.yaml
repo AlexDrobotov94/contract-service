@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../../../tooling/schemas/service.schema.json
+
+apiVersion: kvint/v1
+kind: component
+namespace: default
+id: dialer-service
+name: Dialer Service
+
+owner: group:default/team-dialer
+lifecycle: production
+type: service
+
+system: portal
+domain: dialer
+
+tags:
+  - go
+
+source: https://gitlab.prod.kvint.io/kvint-core/kvint-dialer-go
+
+links: []
+
+contracts:
+  - protocol: rabbitmq
+    path: asyncapi/rabbitmq.yaml
+  - protocol: websocket
+    path: asyncapi/websocket.yaml
+
+dependsOn: []

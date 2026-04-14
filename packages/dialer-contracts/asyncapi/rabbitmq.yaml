@@ -1,0 +1,674 @@
+asyncapi: "3.1.0"
+info:
+  title: Dialer Service RabbitMQ API
+  version: "1.0.0"
+  description: >
+    RabbitMQ-каналы и операции сервиса kvint-dialer-go.
+    Сервис потребляет задачи из нескольких очередей (основная очередь задач, очередь по серверу,
+    очередь ответов от бота, очередь API-команд, очередь прямых запросов к боту)
+    и публикует ответы в reply-очереди коллера и TTS-воркерам.
+
+servers:
+  rabbitmq:
+    host: localhost:5672
+    protocol: amqp
+    description: RabbitMQ-брокер
+
+channels:
+  mainTaskQueue:
+    address: kv.dialer.1-01.1-01sl
+    description: >
+      Основная очередь задач на дозвон. Адрес задаётся через переменную окружения
+      RMQ_MAIN_QUEUE (по умолчанию kv.dialer.1-01.1-01sl). Тело сообщения сжато gzip.
+      Содержит задачи на исходящий и входящий звонок (func: dialing_task / incoming_task).
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.dialer.1-01.1-01sl
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      callerTask:
+        $ref: '#/components/messages/CallerTaskMessage'
+
+  tasksByServerQueue:
+    address: kv.dialer.{ServerName}.{ServerIdent}
+    description: >
+      Динамическая очередь задач, привязанная к конкретному серверу/слоту.
+      Имя очереди формируется функцией utils.GetQueueByServerForSingleCampaign.
+      Структура сообщения идентична основной очереди задач.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.dialer.{ServerName}.{ServerIdent}
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      callerTask:
+        $ref: '#/components/messages/CallerTaskMessage'
+
+  botAnswersQueue:
+    address: kv.bot.12dsk2323ksd
+    description: >
+      Очередь ответов от бота (bot-api). Адрес задаётся через переменную окружения
+      RMQ_BOT_QUEUE (по умолчанию kv.bot.12dsk2323ksd). Тело сообщения сжато gzip.
+      Содержит ответы на запросы get_cache / create_session / handle_message /
+      handle_action / handle_interruption / handle_silence / handle_noise / close_session.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.bot.12dsk2323ksd
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      botResponse:
+        $ref: '#/components/messages/BotResponseMessage'
+
+  apiCommandQueue:
+    address: kv.container.{ServerName}.api
+    description: >
+      Очередь входящих команд управления дайлером (pause / start / show_info /
+      change_lines / restart_dialer). Адрес задаётся через переменную окружения
+      RMQ_API_QUEUE или формируется как kv.container.{ServerName}.api.
+      Тело сообщения сжато gzip. Паттерн request-reply — ответ публикуется
+      в очередь, указанную в поле replyTo доставки.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.container.{ServerName}.api
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      apiCommand:
+        $ref: '#/components/messages/ApiCommandMessage'
+
+  directBotApiQueue:
+    address: kv.dialer.1-01.1-01sl.direct_bot_api
+    description: >
+      Очередь прямых запросов к активным сессиям дайлера от внешних сервисов (бот, интеграции).
+      Имя формируется как {MainQueue}.direct_bot_api.
+      Поддерживаемые функции: handle_message / handle_action / close_session.
+      Тело сообщения сжато gzip.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.dialer.1-01.1-01sl.direct_bot_api
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      botDirectRequest:
+        $ref: '#/components/messages/BotDirectRequestMessage'
+
+  callerReplyQueue:
+    address: "{replyTo}"
+    description: >
+      Динамическая очередь ответов коллеру. Имя берётся из поля replyTo входящего
+      сообщения (d.ReplyTo). Используется при завершении обработки задачи дайлером
+      (Turnstile.RmqReply) и при отправке результата API-команды (ApiService.SendResult).
+      Тело сообщения сжато gzip и завёрнуто в конверт RmqCeleryPacket.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: "{replyTo}"
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      callerReply:
+        $ref: '#/components/messages/CallerReplyMessage'
+
+  ttsWorkerQueue:
+    address: kv.tts.workers.{voice}
+    description: >
+      Очередь TTS-воркера для синтеза речи. Имя формируется как kv.tts.workers.{voice},
+      где voice — название голоса из настроек билда (ttsSettings.Voice).
+      Тело сообщения сжато gzip. Ответ ожидается в динамической replyQueue.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: kv.tts.workers.{voice}
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: "0.3.0"
+    messages:
+      ttsRequest:
+        $ref: '#/components/messages/TtsRequestMessage'
+
+operations:
+  consumeMainTask:
+    action: receive
+    tags:
+      - name: Задачи дозвона
+    channel:
+      $ref: '#/channels/mainTaskQueue'
+    summary: Приём задачи на дозвон из основной очереди
+    description: >
+      Сервис получает задачу на исходящий или входящий звонок.
+      Тело десериализуется в BotData (CallerTask внутри поля data).
+      Сообщения с func=set_call_status игнорируются (NackDiscard).
+    bindings:
+      amqp:
+        ack: true
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: '#/channels/mainTaskQueue/messages/callerTask'
+
+  consumeTaskByServer:
+    action: receive
+    tags:
+      - name: Задачи дозвона
+    channel:
+      $ref: '#/channels/tasksByServerQueue'
+    summary: Приём задачи на дозвон из очереди конкретного сервера
+    description: >
+      Аналог основной очереди задач, но привязан к конкретному серверу/слоту.
+      Используется при конфигурации single-campaign.
+      Очередь создаётся динамически через utils.GetQueueByServerForSingleCampaign.
+    bindings:
+      amqp:
+        ack: true
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: '#/channels/tasksByServerQueue/messages/callerTask'
+
+  consumeBotAnswers:
+    action: receive
+    tags:
+      - name: Бот API
+    channel:
+      $ref: '#/channels/botAnswersQueue'
+    summary: Приём ответа от бота (bot-api)
+    description: >
+      Ответы бота на запросы сессии: get_cache, create_session, handle_message,
+      handle_action, handle_interruption, handle_silence, handle_noise, close_session.
+      Десериализуется в BotResponse_Any и маршрутизируется в активную сессию FSM по correlation_id.
+    bindings:
+      amqp:
+        ack: true
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: '#/channels/botAnswersQueue/messages/botResponse'
+
+  consumeApiCommand:
+    action: receive
+    tags:
+      - name: Управление дайлером
+    channel:
+      $ref: '#/channels/apiCommandQueue'
+    summary: Приём команды управления дайлером через RabbitMQ
+    description: >
+      Входящие команды: pause, start, show_info, change_lines, restart_dialer.
+      После обработки сервис публикует результат в очередь replyTo из доставки.
+      Паттерн request-reply.
+    bindings:
+      amqp:
+        ack: true
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: '#/channels/apiCommandQueue/messages/apiCommand'
+
+  consumeDirectBotRequest:
+    action: receive
+    tags:
+      - name: Бот API
+    channel:
+      $ref: '#/channels/directBotApiQueue'
+    summary: Приём прямого запроса к активной сессии дайлера
+    description: >
+      Внешний сервис (бот, интеграция) отправляет handle_message / handle_action /
+      close_session напрямую в работающую сессию дайлера, минуя обычный цикл bot-api.
+      Запрос маршрутизируется по session_id в нужный канал FSM.
+    bindings:
+      amqp:
+        ack: true
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: '#/channels/directBotApiQueue/messages/botDirectRequest'
+
+  publishCallerReply:
+    action: send
+    tags:
+      - name: Задачи дозвона
+    channel:
+      $ref: '#/channels/callerReplyQueue'
+    summary: Публикация результата задачи или ответа на API-команду в очередь коллера
+    description: >
+      Сервис публикует ответ в очередь, указанную в поле replyTo входящего сообщения.
+      Используется в двух сценариях:
+      1. Завершение обработки задачи дозвона (Turnstile.RmqReply) — тело сжато gzip.
+      2. Ответ на команду управления (ApiService.SendResult) — тело сжато gzip.
+      Конверт — RmqCeleryPacket с полями correlation_id, answer_queue, data.
+    bindings:
+      amqp:
+        deliveryMode: 2
+        timestamp: true
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: '#/channels/callerReplyQueue/messages/callerReply'
+
+  publishTtsRequest:
+    action: send
+    tags:
+      - name: TTS
+    channel:
+      $ref: '#/channels/ttsWorkerQueue'
+    summary: Запрос синтеза речи у TTS-воркера
+    description: >
+      Сервис публикует запрос на синтез аудио для очередного сообщения билда.
+      Имя очереди — kv.tts.workers.{voice}. Тело сжато gzip.
+      Ответ ожидается в динамической reply-очереди с приоритетом 2.
+    bindings:
+      amqp:
+        deliveryMode: 2
+        timestamp: true
+        priority: 2
+        bindingVersion: "0.3.0"
+    messages:
+      - $ref: '#/channels/ttsWorkerQueue/messages/ttsRequest'
+
+components:
+  messages:
+    CallerTaskMessage:
+      name: CallerTaskMessage
+      title: Задача на дозвон
+      summary: Задача на исходящий или входящий звонок от коллера
+      contentType: application/json
+      bindings:
+        amqp:
+          contentEncoding: gzip
+          messageType: caller_task
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: '#/components/schemas/RmqEnvelopeWithCallerTask'
+
+    BotResponseMessage:
+      name: BotResponseMessage
+      title: Ответ бота
+      summary: Ответ bot-api на запрос сессии дайлера
+      contentType: application/json
+      bindings:
+        amqp:
+          contentEncoding: gzip
+          messageType: bot_response
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: '#/components/schemas/RmqEnvelopeWithBotResponse'
+
+    ApiCommandMessage:
+      name: ApiCommandMessage
+      title: Команда управления дайлером
+      summary: Команда на паузу, запуск, смену линий или рестарт дайлера
+      contentType: application/json
+      bindings:
+        amqp:
+          contentEncoding: gzip
+          messageType: api_command
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: '#/components/schemas/RmqEnvelopeWithApiCommand'
+
+    BotDirectRequestMessage:
+      name: BotDirectRequestMessage
+      title: Прямой запрос к сессии дайлера
+      summary: Запрос handle_message / handle_action / close_session напрямую к активной сессии
+      contentType: application/json
+      bindings:
+        amqp:
+          contentEncoding: gzip
+          messageType: bot_direct_request
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: '#/components/schemas/RmqEnvelopeWithBotRequest'
+
+    CallerReplyMessage:
+      name: CallerReplyMessage
+      title: Ответ в очередь коллера
+      summary: Результат обработки задачи или ответ на команду управления
+      contentType: application/json
+      bindings:
+        amqp:
+          contentEncoding: gzip
+          messageType: caller_reply
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: '#/components/schemas/RmqCeleryPacket'
+
+    TtsRequestMessage:
+      name: TtsRequestMessage
+      title: Запрос синтеза речи
+      summary: Запрос к TTS-воркеру на генерацию аудио для фразы
+      contentType: application/json
+      bindings:
+        amqp:
+          contentEncoding: gzip
+          messageType: tts_request
+          bindingVersion: "0.3.0"
+      payload:
+        $ref: '#/components/schemas/TtsRequestPayload'
+
+  schemas:
+    RmqCeleryPacket:
+      type: object
+      description: Универсальный конверт сообщений в системе Kvint (Celery-совместимый формат)
+      properties:
+        version:
+          type: integer
+          description: Версия протокола (всегда 1)
+        correlation_id:
+          type: string
+          description: Уникальный идентификатор запроса/задачи (UUID)
+        status:
+          type: string
+          description: Статус обработки (Complete / Error / Progress)
+          enum: [Complete, Error, Progress]
+        num:
+          type: integer
+          description: Порядковый номер сообщения
+        start_date:
+          type: string
+          description: Дата и время начала обработки (YYYY-MM-DD HH:MM:SS)
+        send_date:
+          type: string
+          description: Дата и время отправки (YYYY-MM-DD HH:MM:SS)
+        from:
+          type: string
+          description: Имя сервиса-отправителя
+        to:
+          type: string
+          description: Имя сервиса-получателя
+        ttl:
+          type: integer
+          description: Время жизни сообщения в секундах
+        answer_queue:
+          type: string
+          description: Очередь для отправки ответа (replyTo)
+        log:
+          type: string
+          description: Лог ошибки (при status=Error)
+        error_code:
+          type: string
+          description: Код ошибки
+        traceback:
+          type: string
+          description: Трассировка стека ошибки
+        data:
+          description: Полезная нагрузка сообщения (зависит от типа операции)
+      required:
+        - correlation_id
+
+    CallerTaskPayload:
+      type: object
+      description: Задача дозвона от коллера (CallerTask)
+      properties:
+        id:
+          type: string
+          description: Идентификатор задачи (session_id)
+        phone:
+          type: string
+          description: Номер телефона абонента
+        company_id:
+          description: Идентификатор компании (int или string)
+        task_id:
+          description: Идентификатор задачи в CRM
+        is_test:
+          type: boolean
+          description: Флаг тестового звонка
+        build_id:
+          type: string
+          description: Идентификатор билда бота
+        is_incoming:
+          type: boolean
+          description: Входящий звонок
+        wave_number:
+          type: integer
+          description: Номер волны обзвона
+        registry_id:
+          type: string
+          description: Идентификатор реестра
+        call_data:
+          $ref: '#/components/schemas/CallData'
+        operator_settings:
+          $ref: '#/components/schemas/CampaignOperatorSettings'
+      required:
+        - id
+        - phone
+
+    CallData:
+      type: object
+      description: Параметры телефонного вызова
+      properties:
+        trunk:
+          type: string
+          description: Транк для вызова (например mtt:1)
+        dest:
+          type: string
+          description: Назначение вызова
+        callerid:
+          type: string
+          description: Caller ID
+        phone:
+          type: string
+          description: Номер телефона
+        attempt_number:
+          type: integer
+          description: Номер попытки дозвона
+        timeout:
+          type: number
+          description: Лимит времени дозвона в секундах
+        external_id:
+          type: string
+          description: Внешний идентификатор
+
+    CampaignOperatorSettings:
+      type: object
+      description: Настройки перевода на оператора из настроек кампании
+      properties:
+        operator_number:
+          type: string
+          description: Номер оператора
+        operator_trunk:
+          type: string
+          description: Транк для перевода на оператора
+        operator_callerid:
+          type: string
+          description: Caller ID при переводе на оператора
+
+    RmqEnvelopeWithCallerTask:
+      type: object
+      description: Конверт RmqCeleryPacket с задачей дозвона в поле data
+      allOf:
+        - $ref: '#/components/schemas/RmqCeleryPacket'
+      properties:
+        data:
+          $ref: '#/components/schemas/CallerTaskPayload'
+      required:
+        - correlation_id
+        - data
+
+    BotResponseData:
+      type: object
+      description: >
+        Данные ответа от бота. Поле func определяет тип ответа:
+        get_cache / create_session / handle_message / handle_action /
+        handle_interruption / handle_silence / handle_noise / close_session.
+      properties:
+        func:
+          type: string
+          description: Тип функции бота
+          enum:
+            - get_cache
+            - create_session
+            - handle_message
+            - handle_action
+            - handle_interruption
+            - handle_silence
+            - handle_noise
+            - close_session
+        session_id:
+          type: string
+          description: Идентификатор сессии звонка
+        is_final_state:
+          type: boolean
+          description: Флаг финального состояния сценария
+        is_operator_state:
+          type: boolean
+          description: Флаг состояния перевода на оператора
+        instance_queue:
+          type: string
+          description: Очередь экземпляра бота (при create_session)
+        messages:
+          type: array
+          description: Список аудио-сообщений для воспроизведения
+          items:
+            type: object
+        fields:
+          type: object
+          description: Произвольные поля сценария
+        status:
+          type: string
+          description: Статус выполнения (при close_session)
+      required:
+        - func
+        - session_id
+
+    RmqEnvelopeWithBotResponse:
+      type: object
+      description: Конверт RmqCeleryPacket с ответом от бота в поле data
+      allOf:
+        - $ref: '#/components/schemas/RmqCeleryPacket'
+      properties:
+        data:
+          $ref: '#/components/schemas/BotResponseData'
+      required:
+        - correlation_id
+        - data
+
+    ApiCommandData:
+      type: object
+      description: >
+        Данные команды управления дайлером. Поле func определяет тип команды:
+        pause / start / show_info / change_lines / restart_dialer.
+      properties:
+        func:
+          type: string
+          description: Тип команды
+          enum:
+            - pause
+            - start
+            - show_info
+            - change_lines
+            - restart_dialer
+        lines:
+          type: integer
+          description: Количество линий (для change_lines, от 1 до 100)
+        telephony_type:
+          type: string
+          description: Тип телефонии (для restart_dialer)
+        campaign_id:
+          type: string
+          description: Идентификатор кампании (для restart_dialer)
+        build_id:
+          type: string
+          description: Идентификатор билда (для restart_dialer)
+      required:
+        - func
+
+    RmqEnvelopeWithApiCommand:
+      type: object
+      description: Конверт RmqCeleryPacket с командой управления дайлером в поле data
+      allOf:
+        - $ref: '#/components/schemas/RmqCeleryPacket'
+      properties:
+        data:
+          $ref: '#/components/schemas/ApiCommandData'
+      required:
+        - correlation_id
+        - data
+
+    BotRequestData:
+      type: object
+      description: >
+        Прямой запрос к активной сессии дайлера. Поле func определяет тип:
+        handle_message / handle_action / close_session.
+      properties:
+        func:
+          type: string
+          description: Тип запроса
+          enum:
+            - handle_message
+            - handle_action
+            - close_session
+        session_id:
+          type: string
+          description: Идентификатор активной сессии дайлера
+      required:
+        - func
+        - session_id
+
+    RmqEnvelopeWithBotRequest:
+      type: object
+      description: Конверт RmqCeleryPacket с прямым запросом к сессии дайлера
+      allOf:
+        - $ref: '#/components/schemas/RmqCeleryPacket'
+      properties:
+        data:
+          $ref: '#/components/schemas/BotRequestData'
+      required:
+        - correlation_id
+        - data
+
+    TtsRequestPayload:
+      type: object
+      description: Запрос к TTS-воркеру на синтез аудио. Тело сжато gzip и завёрнуто в RmqCeleryPacket.
+      allOf:
+        - $ref: '#/components/schemas/RmqCeleryPacket'
+      properties:
+        data:
+          type: object
+          description: Данные для синтеза речи (текст, голос, настройки)
+          properties:
+            text:
+              type: string
+              description: Текст для синтеза
+            message_id:
+              type: string
+              description: Идентификатор сообщения (correlation_id для ответа)
+      required:
+        - correlation_id
+        - data

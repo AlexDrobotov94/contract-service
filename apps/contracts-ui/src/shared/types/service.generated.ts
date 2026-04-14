@@ -19,7 +19,7 @@ export interface ServiceDescriptor {
   /**
    * Уникальный идентификатор сервиса. Должен быть зарегистрирован в services.schema.json.
    */
-  id: 'chat-service';
+  id: 'chat-service' | 'dialer-service';
   /**
    * Человекочитаемое название сервиса.
    */
@@ -31,7 +31,7 @@ export interface ServiceDescriptor {
   /**
    * Владелец в формате <kind>:<namespace>/<id>. Должен быть зарегистрирован в owners.schema.json.
    */
-  owner: 'group:default/team-chat';
+  owner: 'group:default/team-chat' | 'group:default/team-dialer';
   /**
    * Стадия жизненного цикла сервиса.
    */
@@ -112,7 +112,7 @@ export interface ServiceDescriptor {
    * Явные зависимости от других сервисов.
    */
   dependsOn?: {
-    service: 'chat-service';
+    service: 'chat-service' | 'dialer-service';
     /**
      * Тип зависимости: http — синхронный вызов, event/queue — асинхронный, socket — WebSocket.
      */

@@ -1,0 +1,400 @@
+asyncapi: "3.1.0"
+info:
+  title: Dialer Service WebSocket API
+  version: "1.0.0"
+  description: >
+    Нативный WebSocket интерфейс сервиса набора. Сервис принимает подключения
+    по пути /{callId} и обменивается JSON-сообщениями с полем event в качестве
+    дискриминатора. Поддерживает два адаптера телефонии: прямой (WebTeleDirect)
+    и Twilio.
+
+servers:
+  development:
+    host: "localhost:50002"
+    protocol: ws
+    pathname: /{callId}
+    description: Development сервер (порт задаётся через WEB_AUDIO_PORT)
+
+channels:
+  start:
+    address: start
+    description: >
+      Клиент уведомляет сервер о том, что пользователь поднял трубку и готов
+      принимать аудио. В Twilio-режиме содержит streamSid для последующей
+      адресации аудиопотока.
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      startMessage:
+        $ref: "#/components/messages/StartMessage"
+
+  audio:
+    address: audio
+    description: >
+      Двунаправленный аудиоканал. Сервер отправляет PCM-аудио в base64 для
+      воспроизведения клиенту; клиент возвращает входящее аудио от пользователя
+      в том же формате.
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      audioMessage:
+        $ref: "#/components/messages/AudioMessage"
+
+  mark:
+    address: mark
+    description: >
+      Клиент уведомляет сервер о завершении воспроизведения аудио-чанка.
+      Поле mark содержит идентификатор завершённого чанка, переданного ранее
+      в событии audio.
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      markMessage:
+        $ref: "#/components/messages/MarkMessage"
+
+  clear:
+    address: clear
+    description: >
+      Сервер отправляет команду прервать все поставленные в очередь аудио-чанки.
+      В Twilio-режиме дополнительно передаётся streamSid.
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      clearMessage:
+        $ref: "#/components/messages/ClearMessage"
+
+  log:
+    address: log
+    description: >
+      Сервер передаёт клиенту диагностическую запись о событии звонка
+      (источник: bot или user, текст, идентификатор метки аудио).
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      logMessage:
+        $ref: "#/components/messages/LogMessage"
+
+  call_stopped:
+    address: call_stopped
+    description: >
+      Сервер уведомляет клиента о корректном завершении звонка и закрытии
+      WebSocket-соединения. Клиент должен завершить сессию после получения
+      этого события.
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      callStoppedMessage:
+        $ref: "#/components/messages/CallStoppedMessage"
+
+  media:
+    address: media
+    description: >
+      Twilio Media Streams — двунаправленный канал аудио в формате ulaw/base64.
+      Сервер отправляет аудио для воспроизведения; Twilio передаёт входящий
+      аудиопоток от абонента.
+    bindings:
+      ws:
+        bindingVersion: "0.1.0"
+    messages:
+      mediaMessage:
+        $ref: "#/components/messages/MediaMessage"
+
+operations:
+  onStart:
+    action: receive
+    summary: Получить сигнал о готовности клиента
+    tags:
+      - name: Звонки
+    channel:
+      $ref: "#/channels/start"
+    messages:
+      - $ref: "#/channels/start/messages/startMessage"
+
+  sendAudio:
+    action: send
+    summary: Отправить аудио-чанк клиенту для воспроизведения
+    tags:
+      - name: Звонки
+    channel:
+      $ref: "#/channels/audio"
+    messages:
+      - $ref: "#/channels/audio/messages/audioMessage"
+
+  onAudio:
+    action: receive
+    summary: Получить входящее аудио от клиента
+    tags:
+      - name: Звонки
+    channel:
+      $ref: "#/channels/audio"
+    messages:
+      - $ref: "#/channels/audio/messages/audioMessage"
+
+  onMark:
+    action: receive
+    summary: Получить подтверждение завершения воспроизведения аудио-чанка
+    tags:
+      - name: Звонки
+    channel:
+      $ref: "#/channels/mark"
+    messages:
+      - $ref: "#/channels/mark/messages/markMessage"
+
+  sendClear:
+    action: send
+    summary: Прервать воспроизведение всех аудио-чанков
+    tags:
+      - name: Звонки
+    channel:
+      $ref: "#/channels/clear"
+    messages:
+      - $ref: "#/channels/clear/messages/clearMessage"
+
+  sendLog:
+    action: send
+    summary: Передать диагностическую запись клиенту
+    tags:
+      - name: Звонки
+    channel:
+      $ref: "#/channels/log"
+    messages:
+      - $ref: "#/channels/log/messages/logMessage"
+
+  sendCallStopped:
+    action: send
+    summary: Уведомить клиента о завершении звонка
+    tags:
+      - name: Звонки
+    channel:
+      $ref: "#/channels/call_stopped"
+    messages:
+      - $ref: "#/channels/call_stopped/messages/callStoppedMessage"
+
+  sendMedia:
+    action: send
+    summary: Отправить аудио в Twilio Media Stream
+    tags:
+      - name: Twilio
+    channel:
+      $ref: "#/channels/media"
+    messages:
+      - $ref: "#/channels/media/messages/mediaMessage"
+
+  onMedia:
+    action: receive
+    summary: Получить аудиопоток от Twilio
+    tags:
+      - name: Twilio
+    channel:
+      $ref: "#/channels/media"
+    messages:
+      - $ref: "#/channels/media/messages/mediaMessage"
+
+components:
+  messages:
+    StartMessage:
+      name: StartMessage
+      title: Старт звонка
+      summary: >
+        Сигнал о начале аудио-сессии. В прямом режиме — пользователь поднял
+        трубку. В Twilio-режиме содержит идентификатор стрима.
+      payload:
+        $ref: "#/components/schemas/StartPayload"
+
+    AudioMessage:
+      name: AudioMessage
+      title: Аудио-чанк
+      summary: >
+        PCM-аудио в кодировке base64. Используется в обоих направлениях:
+        сервер отправляет синтезированную речь, клиент возвращает
+        входящее аудио от пользователя.
+      payload:
+        $ref: "#/components/schemas/AudioPayload"
+
+    MarkMessage:
+      name: MarkMessage
+      title: Метка завершения аудио
+      summary: >
+        Клиент сообщает серверу, что аудио-чанк с данной меткой полностью
+        воспроизведён.
+      payload:
+        $ref: "#/components/schemas/MarkPayload"
+
+    ClearMessage:
+      name: ClearMessage
+      title: Очистить очередь аудио
+      summary: >
+        Команда немедленно остановить воспроизведение и очистить очередь
+        аудио-чанков.
+      payload:
+        $ref: "#/components/schemas/ClearPayload"
+
+    LogMessage:
+      name: LogMessage
+      title: Диагностическое сообщение
+      summary: >
+        Запись о событии звонка для отладки и аудита. Содержит источник
+        (bot/user), текст и идентификатор метки.
+      payload:
+        $ref: "#/components/schemas/LogPayload"
+
+    CallStoppedMessage:
+      name: CallStoppedMessage
+      title: Звонок завершён
+      summary: >
+        Уведомление о корректном завершении звонка. После получения этого
+        события клиент должен закрыть WebSocket-соединение.
+      payload:
+        $ref: "#/components/schemas/CallStoppedPayload"
+
+    MediaMessage:
+      name: MediaMessage
+      title: Twilio Media Stream
+      summary: >
+        Аудио-сообщение протокола Twilio Media Streams. В направлении
+        сервер→Twilio содержит ulaw-аудио в base64. В направлении
+        Twilio→сервер содержит входящий аудиопоток от абонента.
+      payload:
+        $ref: "#/components/schemas/MediaPayload"
+
+  schemas:
+    StartPayload:
+      type: object
+      description: Тело события start
+      properties:
+        event:
+          type: string
+          const: start
+          description: Дискриминатор типа события
+        streamSid:
+          type: string
+          description: >
+            Идентификатор Twilio Media Stream. Присутствует только
+            в Twilio-режиме; используется для адресации последующих
+            аудио-сообщений.
+        protocol:
+          type: string
+          description: Протокол соединения (только в Twilio connected-событии)
+        version:
+          type: string
+          description: Версия протокола (только в Twilio connected-событии)
+      required:
+        - event
+
+    AudioPayload:
+      type: object
+      description: Тело события audio (прямой режим WebTeleDirect)
+      properties:
+        event:
+          type: string
+          const: audio
+          description: Дискриминатор типа события
+        mark:
+          type: string
+          description: >
+            Идентификатор аудио-чанка. Используется для отслеживания
+            завершения воспроизведения через событие mark.
+        audio:
+          type: string
+          description: PCM-аудио данные, закодированные в base64
+      required:
+        - event
+
+    MarkPayload:
+      type: object
+      description: Тело события mark
+      properties:
+        event:
+          type: string
+          const: mark
+          description: Дискриминатор типа события
+        mark:
+          type: string
+          description: Идентификатор аудио-чанка, воспроизведение которого завершено
+      required:
+        - event
+        - mark
+
+    ClearPayload:
+      type: object
+      description: Тело события clear
+      properties:
+        event:
+          type: string
+          const: clear
+          description: Дискриминатор типа события
+        streamSid:
+          type: string
+          description: >
+            Идентификатор Twilio Media Stream. Присутствует только
+            в Twilio-режиме.
+      required:
+        - event
+
+    LogPayload:
+      type: object
+      description: Тело события log
+      properties:
+        event:
+          type: string
+          const: log
+          description: Дискриминатор типа события
+        text:
+          type: string
+          description: Текст диагностического сообщения
+        mark:
+          type: string
+          description: Идентификатор аудио-метки, с которой связано сообщение
+        source:
+          type: string
+          enum:
+            - bot
+            - user
+          description: Источник сообщения — бот или пользователь
+      required:
+        - event
+        - text
+        - mark
+        - source
+
+    CallStoppedPayload:
+      type: object
+      description: Тело события call_stopped
+      properties:
+        event:
+          type: string
+          const: call_stopped
+          description: Дискриминатор типа события
+      required:
+        - event
+
+    MediaPayload:
+      type: object
+      description: >
+        Тело события media протокола Twilio Media Streams.
+        Структура соответствует спецификации Twilio Programmable Voice.
+      properties:
+        event:
+          type: string
+          const: media
+          description: Дискриминатор типа события
+        streamSid:
+          type: string
+          description: Идентификатор Twilio Media Stream
+        media:
+          type: object
+          description: Контейнер аудио-данных
+          properties:
+            payload:
+              type: string
+              description: Аудио в формате ulaw, закодированное в base64
+          required:
+            - payload
+      required:
+        - event
