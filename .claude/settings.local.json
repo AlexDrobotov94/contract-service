@@ -39,7 +39,10 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(mkdir -p /d/kvint-for-contracts/contract-service/.claude/agent-memory/kvint-websocket-agent)",
       "Bash(echo '# Memory Index')",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(xargs -I {} sh -c 'echo \"=== {} ===\" && ls -la \"{}\"')",
+      "Bash(xargs ls *)",
+      "WebFetch(domain:socket.io)"
     ]
   }
 }

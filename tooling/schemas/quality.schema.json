@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "quality.schema.json",
+  "title": "Contract Quality",
+  "description": "Типы для x-quality-* расширений OpenAPI/AsyncAPI и x-quality-summary. Используются порталом контрактов для отображения метрик качества.",
+  "definitions": {
+    "QualitySummaryScore": {
+      "title": "QualitySummaryScore",
+      "description": "Счётчики по одному критерию качества: yes — критерий выполнен, no — не выполнен, na — не применимо к операции.",
+      "type": "object",
+      "required": ["yes", "no", "na"],
+      "additionalProperties": false,
+      "properties": {
+        "yes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Количество операций, для которых критерий выполнен."
+        },
+        "no": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Количество операций, для которых критерий не выполнен."
+        },
+        "na": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Количество операций, для которых критерий неприменим."
+        }
+      }
+    },
+
+    "HttpQualitySummaryScores": {
+      "title": "HttpQualitySummaryScores",
+      "description": "Агрегированные счётчики по всем 6 HTTP-критериям качества.",
+      "type": "object",
+      "required": [
+        "params-typed",
+        "body-typed",
+        "response-typed",
+        "body-validated",
+        "errors-defined",
+        "contract-implemented"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "params-typed":         { "$ref": "#/definitions/QualitySummaryScore" },
+        "body-typed":           { "$ref": "#/definitions/QualitySummaryScore" },
+        "response-typed":       { "$ref": "#/definitions/QualitySummaryScore" },
+        "body-validated":       { "$ref": "#/definitions/QualitySummaryScore" },
+        "errors-defined":       { "$ref": "#/definitions/QualitySummaryScore" },
+        "contract-implemented": { "$ref": "#/definitions/QualitySummaryScore" }
+      }
+    },
+
+    "AsyncQualitySummaryScores": {
+      "title": "AsyncQualitySummaryScores",
+      "description": "Агрегированные счётчики по всем 4 AsyncAPI-критериям качества.",
+      "type": "object",
+      "required": [
+        "payload-typed",
+        "payload-validated",
+        "errors-defined",
+        "contract-implemented"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "payload-typed":        { "$ref": "#/definitions/QualitySummaryScore" },
+        "payload-validated":    { "$ref": "#/definitions/QualitySummaryScore" },
+        "errors-defined":       { "$ref": "#/definitions/QualitySummaryScore" },
+        "contract-implemented": { "$ref": "#/definitions/QualitySummaryScore" }
+      }
+    },
+
+    "HttpQualitySummary": {
+      "title": "HttpQualitySummary",
+      "description": "Корневой блок x-quality-summary в OpenAPI-файле. Содержит агрегированные метрики по всем HTTP-операциям.",
+      "type": "object",
+      "required": ["total", "scores", "generatedAt", "generatedBy"],
+      "additionalProperties": false,
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Общее количество HTTP-операций в файле."
+        },
+        "scores": {
+          "$ref": "#/definitions/HttpQualitySummaryScores"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp момента генерации контракта."
+        },
+        "generatedBy": {
+          "type": "string",
+          "description": "Имя агента, выполнившего оценку (например: kvint-openapi-full-agent)."
+        }
+      }
+    },
+
+    "AsyncQualitySummary": {
+      "title": "AsyncQualitySummary",
+      "description": "Корневой блок x-quality-summary в AsyncAPI-файле. Содержит агрегированные метрики по всем async-операциям.",
+      "type": "object",
+      "required": ["total", "scores", "generatedAt", "generatedBy"],
+      "additionalProperties": false,
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Общее количество async-операций в файле."
+        },
+        "scores": {
+          "$ref": "#/definitions/AsyncQualitySummaryScores"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp момента генерации контракта."
+        },
+        "generatedBy": {
+          "type": "string",
+          "description": "Имя агента, выполнившего оценку (например: kvint-rabbitmq-agent)."
+        }
+      }
+    },
+
+    "HttpOperationQuality": {
+      "title": "HttpOperationQuality",
+      "description": "x-quality-* расширения на уровне одной HTTP-операции OpenAPI. Все поля опциональны: отсутствующее поле означает неприменимость критерия (N/A).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x-quality-params-typed": {
+          "type": "boolean",
+          "description": "Все path/query/header параметры операции имеют явные типы."
+        },
+        "x-quality-body-typed": {
+          "type": "boolean",
+          "description": "Тело запроса типизировано явным DTO/интерфейсом/схемой."
+        },
+        "x-quality-response-typed": {
+          "type": "boolean",
+          "description": "Метод возвращает явный не-any тип."
+        },
+        "x-quality-body-validated": {
+          "type": "boolean",
+          "description": "Тело запроса проходит runtime-валидацию."
+        },
+        "x-quality-errors-defined": {
+          "type": "boolean",
+          "description": "Определён хотя бы один error-кейс (4xx/5xx)."
+        },
+        "x-quality-contract-implemented": {
+          "type": "boolean",
+          "description": "Сервис использует контракт-пакет (@kvint/*-contracts) или кодогенерацию."
+        }
+      }
+    },
+
+    "AsyncOperationQuality": {
+      "title": "AsyncOperationQuality",
+      "description": "x-quality-* расширения на уровне одной AsyncAPI-операции. Все поля опциональны.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x-quality-payload-typed": {
+          "type": "boolean",
+          "description": "Payload сообщения типизирован явным DTO/схемой."
+        },
+        "x-quality-payload-validated": {
+          "type": "boolean",
+          "description": "Payload проходит runtime-валидацию."
+        },
+        "x-quality-errors-defined": {
+          "type": "boolean",
+          "description": "Определена обработка ошибок (nack, DLX, error-событие, close с кодом)."
+        },
+        "x-quality-contract-implemented": {
+          "type": "boolean",
+          "description": "Сервис использует контракт-пакет или кодогенерацию."
+        }
+      }
+    }
+  }
+}
