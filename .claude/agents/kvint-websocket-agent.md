@@ -82,6 +82,32 @@ For each group, derive a tag name — translate to Russian if the prefix maps to
 
 The table above is a reference for common cases only — not an exhaustive list. For any prefix not in the table, derive a meaningful tag from the domain context of the event name and its payload. Capitalized prefix as-is is a fallback, not a default.
 
+## Phase 2.7: Quality Assessment
+
+> Загрузи скилл: прочитай `.claude/skills/kvint-assess-contract-quality/SKILL.md`.
+> Для AsyncAPI-паттернов загружай нужный reference-файл из
+> `.claude/skills/kvint-assess-contract-quality/references/`
+> (async-nestjs.md / async-express.md / async-go.md / async-python.md).
+
+### Pre-scan
+
+Выполни Фазу 1 скилла по `scannedDir`: определи язык, проверь contract-имплементацию,
+сохрани флаг `contractImplemented` (true/false).
+
+### Per-operation
+
+Для каждой операции в генерируемом YAML примени AsyncAPI-критерии скилла (Фаза 2):
+`x-quality-payload-typed`, `x-quality-payload-validated`, `x-quality-errors-defined`,
+`x-quality-contract-implemented`
+
+Размести флаги сразу после `summary:` операции. Если критерий N/A — ключ не пишется.
+
+### Post-scan
+
+После всех операций выполни Фазу 3 скилла: подсчитай yes/no/na по всем операциям,
+запиши `x-quality-summary` в корень YAML (на уровне `asyncapi:`, `info:`, `channels:`).
+Укажи `generatedBy: kvint-websocket-agent`.
+
 ## Phase 3: Generate websocket.yaml
 
 > **Specification reference**: before generating, read `.claude/skills/asyncapi-reference/SKILL.md`.

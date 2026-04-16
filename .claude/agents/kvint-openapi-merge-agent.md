@@ -82,6 +82,19 @@ After merging, verify:
 
 If critical validation fails, report the issues clearly before writing the file.
 
+## Quality Summary (Post-scan)
+
+После успешной валидации мержа, перед записью файла:
+
+1. Загрузи скилл: прочитай `.claude/skills/kvint-assess-contract-quality/SKILL.md`
+2. `x-quality-*` флаги на операциях уже присутствуют из партиалов
+   (сохраняются существующим правилом "preserve all `x-*` extension fields at any level")
+3. Выполни Фазу 3 скилла (Post-scan) — агрегируй по всем операциям итогового документа:
+   - Подсчитай yes/no/na по каждому критерию
+   - Запиши `x-quality-summary` в корень финального YAML (на уровне `openapi:`, `info:`, `paths:`)
+   - Укажи `generatedBy: kvint-openapi-merge-agent`
+4. Если в каком-либо партиале был `x-quality-summary` — заменить итоговым агрегированным.
+
 ## Pre-write check (update mode)
 
 Before writing the final merged document:

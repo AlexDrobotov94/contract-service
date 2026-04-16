@@ -1,7 +1,7 @@
 ---
 name: kvint-openapi-controller-agent
 description: "Generator-style OpenAPI partial agent. Accepts a full TransportScanResult JSON and a contract package name. Finds the first unprocessed controller (no .yaml or .claim file exists), claims it, generates a partial OpenAPI 3.0 YAML (paths + components/schemas), and writes it to packages/{packageName}/openapi/partials/. When all controllers are done, creates a .complete sentinel file to signal the merge agent."
-tools: Glob, Grep, Read, Write, Bash
+tools: Glob, Grep, Read, Write, Bash, Skill
 model: sonnet
 color: blue
 ---
@@ -232,6 +232,34 @@ UnresolvedType:
 ```
 
 Do not include `openapi`, `info`, or `servers` keys.
+
+---
+
+## Phase 4.5: Quality Assessment
+
+> Загрузи скилл: прочитай `.claude/skills/kvint-assess-contract-quality/SKILL.md`.
+> Для framework-специфичных паттернов загружай нужный reference-файл из
+> `.claude/skills/kvint-assess-contract-quality/references/` (http-nestjs.md / http-express-ts.md / http-go.md / http-python-fastapi.md).
+
+### Pre-scan (один раз на запуск агента)
+
+Выполни Фазу 1 скилла (Pre-scan) по `scannedDir`:
+- Определи язык и фреймворк
+- Проверь наличие contract-имплементации
+- Сохрани флаг `contractImplemented` (true/false)
+
+### Per-operation
+
+Для каждой операции в сгенерированном YAML примени HTTP-критерии скилла (Фаза 2):
+`x-quality-params-typed`, `x-quality-body-typed`, `x-quality-response-typed`,
+`x-quality-body-validated`, `x-quality-errors-defined`, `x-quality-contract-implemented`
+
+Правила размещения:
+- Флаги — сразу после `summary:` / `operationId:`, до `parameters:` / `requestBody:`
+- Если критерий не применим (N/A) — ключ не пишется вообще
+
+**Важно:** `x-quality-summary` в партиалах НЕ пишется — его вычисляет merge-агент
+после сборки всех партиалов.
 
 ---
 

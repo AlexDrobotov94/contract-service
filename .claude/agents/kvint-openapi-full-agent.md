@@ -1,7 +1,7 @@
 ---
 name: kvint-openapi-full-agent
 description: "Full OpenAPI generator for small services. Accepts a TransportScanResult JSON and a contract package name. Reads ALL HTTP controllers in one pass, resolves types, and writes a complete OpenAPI 3.1 YAML (including openapi/info/servers/tags/security/paths/components) directly to packages/{packageName}/openapi/openapi.yaml. Use for services with ≤ 12 controllers."
-tools: Glob, Grep, Read, Write, Bash
+tools: Glob, Grep, Read, Write, Bash, Skill
 model: sonnet
 color: green
 ---
@@ -120,6 +120,17 @@ Apply TypeScript strategy first. If no results, fall back to minimal schema.
 
 ---
 
+## Phase 3.5: Pre-scan (Quality Assessment)
+
+> Загрузи скилл: прочитай `.claude/skills/kvint-assess-contract-quality/SKILL.md`.
+
+Выполни Фазу 1 скилла (Pre-scan) по `scannedDir`:
+- Определи язык и фреймворк
+- Проверь наличие contract-имплементации в `package.json` / `go.mod` / Makefile
+- Сохрани флаг `contractImplemented` (true/false) для использования в Phase 4
+
+---
+
 ## Phase 4: Generate complete OpenAPI YAML
 
 ### Type mapping
@@ -227,6 +238,12 @@ requestBody:
 
 **Auth:** if `entry.endpoint.auth` is set and not `"public"` → add `security: [{ bearerAuth: [] }]`. If `"public"` → add `security: []`.
 
+**Quality flags:** для каждой операции добавляй `x-quality-*` флаги по HTTP-критериям скилла (Фаза 2):
+`x-quality-params-typed`, `x-quality-body-typed`, `x-quality-response-typed`,
+`x-quality-body-validated`, `x-quality-errors-defined`, `x-quality-contract-implemented`
+Размести сразу после `summary:`, до `parameters:` / `requestBody:`. Если критерий N/A — ключ не пишется.
+Для framework-специфичных паттернов читай нужный reference-файл из `.claude/skills/kvint-assess-contract-quality/references/`.
+
 ### Components/schemas
 
 ```yaml
@@ -257,6 +274,15 @@ UnresolvedType:
   description: "Schema not resolved — source definition not found"
   additionalProperties: true
 ```
+
+---
+
+## Phase 4.5: Post-scan (Quality Summary)
+
+После генерации всех операций выполни Фазу 3 скилла (Post-scan):
+- Пройди по всем операциям, подсчитай yes/no/na по каждому критерию
+- Запиши `x-quality-summary` в корень YAML (на уровне `openapi:`, `info:`, `paths:`)
+- Укажи `generatedBy: kvint-openapi-full-agent`
 
 ---
 
