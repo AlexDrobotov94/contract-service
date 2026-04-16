@@ -3,6 +3,7 @@ import { LifecycleBadge, ProtocolBadge } from "@/entities/service";
 import Link from "next/link";
 import { ROUTES } from "@/shared/configs";
 import { Button } from "@/shared/ui/atoms/button";
+import { QualityBar } from "@/shared/ui/molecules/quality-bar";
 import { IconChevronDown, IconChevronRight, IconExternalLink } from "@tabler/icons-react";
 import { ContractRow } from "../model/types";
 
@@ -69,6 +70,16 @@ export const columns = [
   columnHelper.accessor("lifecycle", {
     header: "Lifecycle",
     cell: ({ getValue }) => <LifecycleBadge lifecycle={getValue()} />,
+  }),
+  columnHelper.accessor("quality", {
+    header: "Quality",
+    enableSorting: false,
+    cell: ({ getValue, row }) => {
+      if (row.subRows.length > 0) return null;
+      const q = getValue();
+      if (!q) return <span className="text-muted-foreground text-xs">—</span>;
+      return <QualityBar score={q.score} summary={q.summary} showTooltip />;
+    },
   }),
   columnHelper.accessor("owner", {
     header: "Owner",

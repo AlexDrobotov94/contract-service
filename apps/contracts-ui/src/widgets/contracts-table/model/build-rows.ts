@@ -1,7 +1,8 @@
 import { ServiceMeta } from "@/entities/service";
+import type { QualityMap } from "@/entities/service/lib/build-quality-map";
 import { ContractRow } from "./types";
 
-export function buildRows(services: ServiceMeta[]): ContractRow[] {
+export function buildRows(services: ServiceMeta[], qualityMap: QualityMap = {}): ContractRow[] {
   return services.map((service) => {
     const base = {
       serviceId: service.id,
@@ -11,10 +12,12 @@ export function buildRows(services: ServiceMeta[]): ContractRow[] {
     };
 
     if (service.contracts.length === 1) {
+      const protocol = service.contracts[0].protocol;
       return {
         ...base,
-        protocol: service.contracts[0].protocol,
+        protocol,
         description: service.contracts[0].description,
+        quality: qualityMap[`${service.id}:${protocol}`],
       };
     }
 
@@ -26,6 +29,7 @@ export function buildRows(services: ServiceMeta[]): ContractRow[] {
         ...base,
         protocol: c.protocol,
         description: c.description,
+        quality: qualityMap[`${service.id}:${c.protocol}`],
       })),
     };
   });

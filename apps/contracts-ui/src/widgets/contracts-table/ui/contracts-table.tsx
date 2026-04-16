@@ -19,11 +19,18 @@ import {
   TableRow,
 } from "@/shared/ui/atoms/table";
 import { ServiceMeta } from "@/entities/service";
+import type { QualityMap } from "@/entities/service/lib/build-quality-map";
 import { buildRows } from "../model/build-rows";
 import { columns } from "./columns";
 
-export const ContractsTable = ({ services }: { services: ServiceMeta[] }) => {
-  const contracts = useMemo(() => buildRows(services), [services]);
+export const ContractsTable = ({
+  services,
+  qualityMap,
+}: {
+  services: ServiceMeta[];
+  qualityMap?: QualityMap;
+}) => {
+  const contracts = useMemo(() => buildRows(services, qualityMap ?? {}), [services, qualityMap]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
