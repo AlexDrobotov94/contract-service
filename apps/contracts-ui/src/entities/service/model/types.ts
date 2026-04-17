@@ -6,5 +6,5 @@ export type ServiceMeta = ServiceDescriptor & {
   _version: string;
 };
 
-export type ServiceProtocol = ServiceMeta["contracts"][number]["protocol"];
+export type ServiceProtocol = NonNullable<ServiceMeta["contracts"]>[number]["protocol"];
 export type ServiceLifecycle = ServiceMeta["lifecycle"];

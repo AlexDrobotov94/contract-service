@@ -57,6 +57,7 @@ const columns = [
     enableSorting: false,
     cell: ({ getValue }) => {
       const contracts = getValue();
+      if (!contracts?.length) return <span className="text-muted-foreground">—</span>;
       return (
         <div className="flex flex-wrap gap-1">
           {contracts.map((c) => (

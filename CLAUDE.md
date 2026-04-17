@@ -62,7 +62,7 @@ links:                                            # optional arbitrary links
   - url: https://grafana.kvint.io/d/<id>
     title: Grafana
     icon: alert  # alert | support | website
-contracts:
+contracts:                                        # optional — omit for type: website / library
   - protocol: http
     path: openapi/openapi.yaml
   - protocol: socket
@@ -75,6 +75,8 @@ contracts:
 
 Supported protocol values: `http`, `rabbitmq`, `socket`, `websocket`, `grpc`, `graphql`.
 Each asyncapi transport is a separate entry — one file per transport, no merging.
+
+For `type: website` and `type: library`, `contracts` is optional — the component is registered in the catalog without contract files.
 
 ### Contract package folder structure
 

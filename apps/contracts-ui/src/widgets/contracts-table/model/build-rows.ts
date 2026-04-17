@@ -11,12 +11,14 @@ export function buildRows(services: ServiceMeta[], qualityMap: QualityMap = {}):
       owner: service.owner,
     };
 
-    if (service.contracts.length === 1) {
-      const protocol = service.contracts[0].protocol;
+    const contracts = service.contracts ?? [];
+
+    if (contracts.length === 1) {
+      const protocol = contracts[0].protocol;
       return {
         ...base,
         protocol,
-        description: service.contracts[0].description,
+        description: contracts[0].description,
         quality: qualityMap[`${service.id}:${protocol}`],
       };
     }
@@ -25,7 +27,7 @@ export function buildRows(services: ServiceMeta[], qualityMap: QualityMap = {}):
       ...base,
       protocol: undefined,
       description: undefined,
-      subRows: service.contracts.map((c) => ({
+      subRows: contracts.map((c) => ({
         ...base,
         protocol: c.protocol,
         description: c.description,

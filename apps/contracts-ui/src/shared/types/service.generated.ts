@@ -75,39 +75,21 @@ export interface ServiceDescriptor {
   }[];
   /**
    * Список контрактных файлов сервиса. Определяет какие вкладки показывать в портале.
-   *
-   * @minItems 1
    */
-  contracts: [
-    {
-      /**
-       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
-       */
-      protocol: 'http' | 'rabbitmq' | 'socket' | 'websocket' | 'grpc' | 'graphql';
-      /**
-       * Относительный путь к файлу контракта от корня пакета. Например: openapi/openapi.yaml
-       */
-      path: string;
-      /**
-       * Краткое описание этого контракта.
-       */
-      description?: string;
-    },
-    ...{
-      /**
-       * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
-       */
-      protocol: 'http' | 'rabbitmq' | 'socket' | 'websocket' | 'grpc' | 'graphql';
-      /**
-       * Относительный путь к файлу контракта от корня пакета. Например: openapi/openapi.yaml
-       */
-      path: string;
-      /**
-       * Краткое описание этого контракта.
-       */
-      description?: string;
-    }[]
-  ];
+  contracts?: {
+    /**
+     * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
+     */
+    protocol: 'http' | 'rabbitmq' | 'socket' | 'websocket' | 'grpc' | 'graphql';
+    /**
+     * Относительный путь к файлу контракта от корня пакета. Например: openapi/openapi.yaml
+     */
+    path: string;
+    /**
+     * Краткое описание этого контракта.
+     */
+    description?: string;
+  }[];
   /**
    * Явные зависимости от других сервисов.
    */
