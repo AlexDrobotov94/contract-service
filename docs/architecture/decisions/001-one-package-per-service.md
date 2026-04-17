@@ -13,7 +13,7 @@
 Один пакет на сервис — все протоколы внутри.
 
 ```
-@kvint/chat-contracts
+@kvint/chat-module
   openapi/openapi.yaml
   asyncapi/rabbitmq.yaml
   asyncapi/socket.yaml
@@ -34,9 +34,9 @@
 ## Альтернатива: пакет на протокол
 
 ```
-@kvint/chat-contracts-http
-@kvint/chat-contracts-queue
-@kvint/chat-contracts-socket
+@kvint/chat-module-http
+@kvint/chat-module-queue
+@kvint/chat-module-socket
 ```
 
 Оправдано если:

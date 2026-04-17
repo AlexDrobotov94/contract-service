@@ -6,7 +6,7 @@ description: >
   or modify service.yaml, service metadata, or service descriptor for a kvint contract package —
   even if they just say "заполни метадату", "напиши service.yaml", "создай дескриптор сервиса",
   "обнови service.yaml", "измени метадату", "отредактируй дескриптор" or pass a package path
-  like "packages/orders-contracts". Also trigger when the user says /kvint-fill-service-yaml.
+  like "packages/orders-module". Also trigger when the user says /kvint-fill-service-yaml.
 ---
 
 # kvint-fill-service-yaml
@@ -21,9 +21,9 @@ description: >
 
 ## Шаг 1: Определить путь к пакету
 
-Если путь к пакету передан как аргумент (например `packages/orders-contracts`) — используй его напрямую.
+Если путь к пакету передан как аргумент (например `packages/orders-module`) — используй его напрямую.
 
-Иначе спроси: «Укажи путь к пакету контрактов (например: `packages/orders-contracts`)»
+Иначе спроси: «Укажи путь к пакету контрактов (например: `packages/orders-module`)»
 
 Принимается относительный путь от корня монорепо или абсолютный.
 
@@ -55,9 +55,9 @@ description: >
 Вычисли slug из имени пакета по правилу:
 
 - Убери путь (`packages/`) — возьми только имя директории
-- Замени суффикс `-contracts` на `-service`
-- Примеры: `packages/orders-contracts` → `orders-service`, `packages/chat-contracts` → `chat-service`
-- Если пакет не содержит `-contracts`, просто используй `{dirname}-service`
+- Замени суффикс `-module` на `-service`
+- Примеры: `packages/orders-module` → `orders-service`, `packages/chat-module` → `chat-service`
+- Если пакет не содержит `-module`, просто используй `{dirname}-service`
 
 Проверь, есть ли вычисленный ID в `services.schema.json#/definitions/serviceId/enum`.
 

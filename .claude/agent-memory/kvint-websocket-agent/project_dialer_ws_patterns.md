@@ -17,4 +17,4 @@ type: project
 - Путь подключения: `/{callId}` (динамический, callId — идентификатор звонка)
 - Два адаптера используют одну WebTeleMainService инфраструктуру: WebTeleDirect и Twilio
 - Twilio-события имеют поле `streamSid` в дополнение к стандартным полям
-- Файл контракта: `packages/dialer-contracts/asyncapi/websocket.yaml`
+- Файл контракта: `packages/dialer-module/asyncapi/websocket.yaml`

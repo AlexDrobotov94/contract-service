@@ -38,8 +38,8 @@ description: >
 
 | Язык/Фреймворк      | Что проверять                                                                                                                                                                 | Где                                              |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| NestJS / Express TS | Наличие `@kvint/<service>-contracts` в `dependencies` или `devDependencies`                                                                                                   | `package.json`                                   |
-| Express JS          | Наличие `@kvint/<service>-contracts` в `package.json`                                                                                                                         | `package.json`                                   |
+| NestJS / Express TS | Наличие `@kvint/<service>-module` в `dependencies` или `devDependencies`                                                                                                   | `package.json`                                   |
+| Express JS          | Наличие `@kvint/<service>-module` в `package.json`                                                                                                                         | `package.json`                                   |
 | Go                  | Наличие `//go:generate` директив с `oapi-codegen`/`protoc-gen-go`, или Makefile с commandами кодогенерации, или импорт shared proto-пакетов                                   | `*.go`, `Makefile`, `go.mod`                     |
 | Python/FastAPI      | Наличие `datamodel-codegen`/`openapi-python-client` в зависимостях или Makefile; или `response_model` ссылается на явно сгенерированные классы (с `# generated` комментарием) | `requirements.txt`, `pyproject.toml`, `Makefile` |
 

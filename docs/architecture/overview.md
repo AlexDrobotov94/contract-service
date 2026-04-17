@@ -21,13 +21,13 @@ Contract-First принцип: если взаимодействие не опи
 ## Как устроено
 
 ```
-packages/*-contracts/     ← контракты сервисов (npm-пакеты)
+packages/*-module/     ← контракты сервисов (npm-пакеты)
 apps/contracts-ui/        ← Next.js портал
 tooling/                  ← скрипты и схемы
 ```
 
 Портал не требует ручного конфига — находит контракт-пакеты автоматически
-по флагу `"contracts": true` в `package.json`.
+по флагу `"catalog": true` в `package.json`.
 
 ---
 
@@ -46,8 +46,8 @@ tooling/                  ← скрипты и схемы
 ## Структура контракт-пакета
 
 ```
-packages/chat-contracts/
-  package.json              ← "contracts": true, @kvint/chat-contracts
+packages/chat-module/
+  package.json              ← "contracts": true, @kvint/chat-module
   metadata/
     service.yaml            ← метаданные: owner, lifecycle, dependsOn и т.д.
   openapi/

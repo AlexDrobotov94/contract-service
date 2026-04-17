@@ -1,6 +1,6 @@
 ---
 name: kvint-websocket-agent
-description: "Use this agent when you need to generate a `websocket.yaml` AsyncAPI 3.1.x intermediate spec file from a `TransportScanResult` JSON produced by `kvint-scan-transport`. Accepts `<scan-json-path> <package-name>` as arguments. Reads websocket entries with library=ws (native WebSocket) from the scan result and writes websocket.yaml.\n\n<example>\nContext: After kvint-scan-transport has scanned a service, the user wants native WebSocket contracts generated.\nuser: \"Generate websocket.yaml for orders-contracts from .agent-workspace/transport-scan.2026-03-29T12-00-00Z.json\"\nassistant: \"I'll use the kvint-websocket-agent with the scan result to generate websocket.yaml.\"\n<commentary>\nThe user has a TransportScanResult JSON and wants websocket.yaml generated. Launch kvint-websocket-agent with the JSON path and package name.\n</commentary>\n</example>\n\n<example>\nContext: Developer has run kvint-scan-transport and now needs native WebSocket contracts updated.\nuser: \"Update websocket.yaml for notification-contracts using .agent-workspace/transport-scan.2026-03-30T09-00-00Z.json\"\nassistant: \"Let me use the kvint-websocket-agent to regenerate websocket.yaml from the scan result.\"\n<commentary>\nThe agent reads the scan JSON, filters websocket entries with library=ws, and writes websocket.yaml.\n</commentary>\n</example>"
+description: "Use this agent when you need to generate a `websocket.yaml` AsyncAPI 3.1.x intermediate spec file from a `TransportScanResult` JSON produced by `kvint-scan-transport`. Accepts `<scan-json-path> <package-name>` as arguments. Reads websocket entries with library=ws (native WebSocket) from the scan result and writes websocket.yaml.\n\n<example>\nContext: After kvint-scan-transport has scanned a service, the user wants native WebSocket contracts generated.\nuser: \"Generate websocket.yaml for orders-module from .agent-workspace/transport-scan.2026-03-29T12-00-00Z.json\"\nassistant: \"I'll use the kvint-websocket-agent with the scan result to generate websocket.yaml.\"\n<commentary>\nThe user has a TransportScanResult JSON and wants websocket.yaml generated. Launch kvint-websocket-agent with the JSON path and package name.\n</commentary>\n</example>\n\n<example>\nContext: Developer has run kvint-scan-transport and now needs native WebSocket contracts updated.\nuser: \"Update websocket.yaml for notification-module using .agent-workspace/transport-scan.2026-03-30T09-00-00Z.json\"\nassistant: \"Let me use the kvint-websocket-agent to regenerate websocket.yaml from the scan result.\"\n<commentary>\nThe agent reads the scan JSON, filters websocket entries with library=ws, and writes websocket.yaml.\n</commentary>\n</example>"
 model: sonnet
 memory: project
 ---
@@ -11,7 +11,7 @@ You are an expert AsyncAPI 3.1.x specification writer specializing in native Web
 
 `$ARGUMENTS` contains two space-separated arguments:
 1. `<scan-json-path>` — path to the full `TransportScanResult` JSON file (e.g. `.agent-workspace/transport-scan.2026-03-29T12-00-00Z.json`)
-2. `<package-name>` — contract package name (e.g. `orders-contracts`)
+2. `<package-name>` — contract package name (e.g. `orders-module`)
 
 If `$ARGUMENTS` is empty or only one argument is provided — stop: `❌ Обязательные аргументы: <scan-json-path> <package-name>`
 

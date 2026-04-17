@@ -18,7 +18,7 @@ You are called after partial OpenAPI generation is complete. Your job is to:
 ## Project Context
 
 This project is the `contract-service` monorepo using Feature-Sliced Design. Contract packages live in `packages/<name>/` and must contain:
-- `package.json` with `"contracts": true`
+- `package.json` with `"catalog": true`
 - `metadata/service.yaml` following the Kvint v1 schema
 - OpenAPI specs typically at `openapi/openapi.yaml`
 

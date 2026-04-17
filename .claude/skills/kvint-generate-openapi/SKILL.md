@@ -19,7 +19,7 @@ description: >
 
 Примеры:
 
-- "Сгенерируй openapi для chat-contracts"
+- "Сгенерируй openapi для chat-module"
 - "Заполни openapi из scan-файла"
 - "/kvint-generate-openapi"
 
@@ -30,7 +30,7 @@ description: >
 Нужно выяснить у пользователя (или взять из контекста разговора):
 
 1. `<scan-json-path>` — путь к файлу `transport-scan.*.json`
-2. `<package-name>` — имя пакета контрактов (например, `chat-contracts`)
+2. `<package-name>` — имя пакета контрактов (например, `chat-module`)
 
 Не начинать работу до получения явного подтверждения обоих параметров.
 

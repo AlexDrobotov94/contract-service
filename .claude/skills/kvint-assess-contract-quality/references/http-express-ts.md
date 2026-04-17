@@ -183,7 +183,7 @@ Swagger-jsdoc аннотации (`@openapi responses: 404`) **не засчит
 // TRUE — в package.json:
 {
   "dependencies": {
-    "@kvint/user-contracts": "^1.0.0"
+    "@kvint/user-module": "^1.0.0"
   }
 }
 

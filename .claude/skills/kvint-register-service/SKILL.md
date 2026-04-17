@@ -17,7 +17,7 @@ This skill registers a service in the kvint monorepo: pulls the latest code and 
 
 Задай пользователю два вопроса (можно сразу оба):
 
-1. **Слаг сервиса** — короткое техническое имя сервиса (например `chat-service`). Именно он станет основой имени пакета контрактов (`packages/chat-contracts`).
+1. **Слаг сервиса** — короткое техническое имя сервиса (например `chat-service`). Именно он станет основой имени пакета контрактов (`packages/chat-module`).
 2. **Путь к папке** — папка с клонированным репозиторием сервиса. Должна быть на том же уровне, что и `contract-service`. Принимается абсолютный путь или просто имя папки (тогда путь строится как `<родительская папка cwd>/<имя папки>`).
 
 ### Шаг 2. Валидация пути
@@ -28,13 +28,13 @@ This skill registers a service in the kvint monorepo: pulls the latest code and 
 
 ### Шаг 3. Скаффолдинг пакета контрактов
 
-Запусти агент `kvint-contract-scaffolder`, передав слаг сервиса как аргумент.
+Запусти агент `kvint-module-scaffolder`, передав слаг сервиса как аргумент.
 
 Жди завершения агента перед переходом к следующему шагу.
 
 ### Шаг 4. Заполнение метаданных сервиса
 
-Запусти скилл `kvint-fill-service-yaml` через Skill tool, передав путь к пакету контрактов как аргумент: `packages/<slug>-contracts`.
+Запусти скилл `kvint-fill-service-yaml` через Skill tool, передав путь к пакету контрактов как аргумент: `packages/<slug>-module`.
 
 Скилл задаёт вопросы в текущем диалоге — пользователь отвечает напрямую. Жди завершения скилла перед переходом к следующему шагу.
 
@@ -58,7 +58,7 @@ This skill registers a service in the kvint monorepo: pulls the latest code and 
 
 Запусти скилл `kvint-generate-openapi`, передав в контексте:
 - путь к scan-файлу (из Шага 6)
-- имя пакета: `<slug>-contracts`
+- имя пакета: `<slug>-module`
 
 Жди завершения скилла перед переходом к следующему шагу.
 
@@ -66,7 +66,7 @@ This skill registers a service in the kvint monorepo: pulls the latest code and 
 
 Запусти скилл `kvint-generate-asyncapi`, передав в контексте:
 - путь к scan-файлу (из Шага 6)
-- имя пакета: `<slug>-contracts`
+- имя пакета: `<slug>-module`
 
 Жди завершения скилла.
 
@@ -88,11 +88,11 @@ This skill registers a service in the kvint monorepo: pulls the latest code and 
 
 | Шаг | Признак выполнения |
 |-----|--------------------|
-| 3. Скаффолдинг | `packages/<slug>-contracts/package.json` существует |
-| 4. service.yaml | `packages/<slug>-contracts/metadata/service.yaml` существует |
+| 3. Скаффолдинг | `packages/<slug>-module/package.json` существует |
+| 4. service.yaml | `packages/<slug>-module/metadata/service.yaml` существует |
 | 5. Prepare | нет артефакта на диске — нужно перезапустить агент |
 | 6. Scan | `.agent-workspace/transport-scan.*.json` существует |
-| 7. OpenAPI | `packages/<slug>-contracts/openapi/openapi.yaml` не пустой |
-| 8. AsyncAPI | файлы в `packages/<slug>-contracts/asyncapi/` существуют |
+| 7. OpenAPI | `packages/<slug>-module/openapi/openapi.yaml` не пустой |
+| 8. AsyncAPI | файлы в `packages/<slug>-module/asyncapi/` существуют |
 
 Сообщи пользователю, с какого шага продолжаешь.

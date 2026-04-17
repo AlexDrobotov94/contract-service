@@ -122,7 +122,7 @@ export interface HttpOperationQuality {
    */
   'x-quality-errors-defined'?: boolean;
   /**
-   * Сервис использует контракт-пакет (@kvint/*-contracts) или кодогенерацию.
+   * Сервис использует контракт-пакет (@kvint/*-module) или кодогенерацию.
    */
   'x-quality-contract-implemented'?: boolean;
 }

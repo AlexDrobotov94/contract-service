@@ -14,9 +14,9 @@ You are a code analysis agent. Your task is to generate a complete OpenAPI 3.1 Y
 
 `$ARGUMENTS` contains two space-separated arguments:
 1. `<scan-json-path>` — path to the full `TransportScanResult` JSON file
-2. `<package-name>` — contract package name (e.g. `chat-contracts`)
+2. `<package-name>` — contract package name (e.g. `chat-module`)
 
-Example: `.agent-workspace/transport-scan.2026-03-29T12-00-00Z.json chat-contracts`
+Example: `.agent-workspace/transport-scan.2026-03-29T12-00-00Z.json chat-module`
 
 The JSON file is a full `TransportScanResult`:
 ```ts
@@ -157,7 +157,7 @@ Derive values from `packageName` and scan metadata:
 openapi: "3.1.0"
 
 info:
-  title: <human-readable title from packageName, strip "-contracts" suffix, title-case>
+  title: <human-readable title from packageName, strip "-module" suffix, title-case>
   version: 1.0.0
   description: ""
 

@@ -37,7 +37,7 @@ Outbound (server → client):
 
 **Note on `processing:catchup`**: this event appears in `ChatServerToClientEvents` as an outbound event too, but the 2026-04-13 scan only detected the inbound gateway handler — no outbound emit was found. The outbound variant is NOT in socket.yaml.
 
-**socket.yaml location**: `packages/chat-contracts/asyncapi/socket.yaml`
+**socket.yaml location**: `packages/chat-service-module/asyncapi/socket.yaml`
 
 **Why:** The Ack<T> pattern and typed event maps are the authoritative source — always check chat-kit ws/ files before assuming payload shapes from scan snippets alone.
 

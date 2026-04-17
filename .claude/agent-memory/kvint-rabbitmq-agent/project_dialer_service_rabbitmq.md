@@ -46,4 +46,4 @@ type: project
 Все consumer-и используют `WithConsumerOptionsQueueDurable` + `WithConsumeOptionsArgXExpires` (x-expires=86400000ms = 1 день).
 
 **Why:** Паттерн описан при анализе kvint-dialer-go (Go-сервис, github.com/wagslane/go-rabbitmq).
-**How to apply:** При генерации asyncapi/rabbitmq.yaml для dialer-contracts — использовать эти очереди и envelope-структуру.
+**How to apply:** При генерации asyncapi/rabbitmq.yaml для dialer-module — использовать эти очереди и envelope-структуру.

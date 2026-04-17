@@ -20,7 +20,7 @@ description: >
 
 Примеры:
 
-- "Сгенерируй asyncapi для chat-contracts"
+- "Сгенерируй asyncapi для chat-module"
 - "Создай asyncapi контракты из scan-файла"
 - "Обнови socket/rabbitmq/websocket спецификации"
 - "/kvint-generate-asyncapi"
@@ -32,7 +32,7 @@ description: >
 Нужно выяснить у пользователя (или взять из контекста разговора):
 
 1. `<scan-json-path>` — путь к файлу `transport-scan.*.json`
-2. `<package-name>` — имя пакета контрактов (например, `chat-contracts`)
+2. `<package-name>` — имя пакета контрактов (например, `chat-module`)
 
 Не начинать запуск агентов до получения явного подтверждения обоих параметров.
 

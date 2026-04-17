@@ -169,11 +169,11 @@ async getUser(): Promise<UserDto> {
 // TRUE — в package.json (любой из разделов):
 {
   "dependencies": {
-    "@kvint/chat-contracts": "^1.0.0"
+    "@kvint/chat-module": "^1.0.0"
   }
 }
 
 // FALSE — пакет отсутствует в package.json
 ```
 
-Имя пакета — `@kvint/<service-id>-contracts`, где `<service-id>` соответствует `id` в `metadata/service.yaml`.
+Имя пакета — `@kvint/<service-id>-module`, где `<service-id>` соответствует `id` в `metadata/service.yaml`.

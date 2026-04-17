@@ -6,7 +6,7 @@ Service discovery and contract management portal for microservices. Scans monore
 
 ```
 apps/contracts-ui/    # Next.js 16 app (main UI)
-packages/             # Contract packages (e.g. chat-contracts)
+packages/             # Module packages (e.g. chat-module)
 tooling/              # JSON schemas + type generation
 ```
 
@@ -39,9 +39,9 @@ npm run generate:types   # tooling/schemas/service.schema.json → shared/types/
 
 ## Key Conventions
 
-### Adding a new contract package
+### Adding a new module
 
-1. Create `packages/<name>/` with `package.json` containing `"contracts": true`
+1. Create `packages/<name>/` with `package.json` containing `"catalog": true`
 2. Add `metadata/service.yaml` following the Kvint v1 schema
 3. Run `npm run generate:types` if the schema changed
 
@@ -78,11 +78,11 @@ Each asyncapi transport is a separate entry — one file per transport, no mergi
 
 For `type: website` and `type: library`, `contracts` is optional — the component is registered in the catalog without contract files.
 
-### Contract package folder structure
+### Module folder structure
 
 ```
-packages/<name>-contracts/
-├── package.json            # "contracts": true required
+packages/<name>-module/
+├── package.json            # "catalog": true required
 ├── metadata/
 │   └── service.yaml
 ├── openapi/
@@ -98,7 +98,7 @@ Each asyncapi file is a complete, self-contained contract for its transport. The
 ### Service discovery
 
 - `getServices()` in `entities/service/api/get-services.ts` is **server-only**
-- Scans all packages with `"contracts": true` in `package.json`
+- Scans all packages with `"catalog": true` in `package.json`
 - Reads `metadata/service.yaml` from each package dir
 
 ### Schemas

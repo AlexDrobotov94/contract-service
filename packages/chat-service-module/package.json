@@ -1,8 +1,8 @@
 {
-  "name": "@kvint/chat-service-contracts",
+  "name": "@kvint/chat-service-module",
   "version": "1.0.0",
   "description": "Контракты chat-service",
   "private": true,
-  "contracts": true,
+  "catalog": true,
   "license": "ISC"
 }

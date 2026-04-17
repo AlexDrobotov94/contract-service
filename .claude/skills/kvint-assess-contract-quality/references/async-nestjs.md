@@ -161,7 +161,7 @@ async handleMessageCreated(msg: MessageCreatedEvent): Promise<void> {
 
 ### 4. `x-quality-contract-implemented`
 
-Значение из Pre-scan флага `contractImplemented` (проверка `@kvint/<service>-contracts` в `package.json`).
+Значение из Pre-scan флага `contractImplemented` (проверка `@kvint/<service>-module` в `package.json`).
 
 ---
 

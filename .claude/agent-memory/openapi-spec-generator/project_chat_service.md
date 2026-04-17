@@ -11,6 +11,6 @@ The chat-service source is compiled-only at `D:/kvint-for-contracts/chat-service
 **How to apply:** When analyzing chat-service always read from `apps/chat-service/dist/` and `packages/chat-kit/dist/`. The `@kvint/chat-kit` package at `packages/chat-kit/dist/` is the shared type library — all response and input schemas are defined there as Zod schemas exported via `.d.ts` files.
 
 The OpenAPI contract file lives at:
-`D:/kvint-for-contracts/contract-service/packages/chat-contracts/openapi/openapi.yaml`
+`D:/kvint-for-contracts/contract-service/packages/chat-service-module/openapi/openapi.yaml`
 
 Framework: NestJS with `nestjs-zod` (ZodValidationPipe). Auth via JwtAuthGuard on all `/chats` routes. Error responses use RFC 7807 ProblemDetails format with a `code` enum field.

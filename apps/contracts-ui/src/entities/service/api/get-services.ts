@@ -11,7 +11,7 @@ export async function getServices(): Promise<ServiceMeta[]> {
 
   const contractPackages = packages.filter(
     (p) =>
-      (p.packageJson as unknown as Record<string, unknown>).contracts === true,
+      (p.packageJson as unknown as Record<string, unknown>).catalog === true,
   );
 
   const services: ServiceMeta[] = [];

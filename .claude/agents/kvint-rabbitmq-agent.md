@@ -1,6 +1,6 @@
 ---
 name: kvint-rabbitmq-agent
-description: "Use this agent when you need to generate or update `asyncapi/rabbitmq.yaml` from a `TransportScanResult` JSON produced by `kvint-scan-transport`. Accepts `<scan-json-path> <package-name>` as arguments. Reads asyncapi entries with technology=rabbitmq from the scan result and writes rabbitmq.yaml.\\n\\n<example>\\nContext: After kvint-scan-transport has scanned a service, the user wants RabbitMQ contracts generated.\\nuser: \"Generate rabbitmq.yaml for chat-contracts from .agent-workspace/transport-scan.2026-03-29T12-00-00Z.json\"\\nassistant: \"I'll use the kvint-rabbitmq-agent with the scan result to generate rabbitmq.yaml.\"\\n<commentary>\\nThe user has a TransportScanResult JSON and wants rabbitmq.yaml generated. Launch kvint-rabbitmq-agent with the JSON path and package name.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: Developer has run kvint-scan-transport and now needs RabbitMQ contracts updated.\\nuser: \"Update rabbitmq.yaml for payment-contracts using .agent-workspace/transport-scan.2026-03-30T09-00-00Z.json\"\\nassistant: \"Let me use the kvint-rabbitmq-agent to regenerate rabbitmq.yaml from the scan result.\"\\n<commentary>\\nThe agent reads the scan JSON, filters asyncapi entries with technology=rabbitmq, reads source files for type details, and writes rabbitmq.yaml.\\n</commentary>\\n</example>"
+description: "Use this agent when you need to generate or update `asyncapi/rabbitmq.yaml` from a `TransportScanResult` JSON produced by `kvint-scan-transport`. Accepts `<scan-json-path> <package-name>` as arguments. Reads asyncapi entries with technology=rabbitmq from the scan result and writes rabbitmq.yaml.\\n\\n<example>\\nContext: After kvint-scan-transport has scanned a service, the user wants RabbitMQ contracts generated.\\nuser: \"Generate rabbitmq.yaml for chat-module from .agent-workspace/transport-scan.2026-03-29T12-00-00Z.json\"\\nassistant: \"I'll use the kvint-rabbitmq-agent with the scan result to generate rabbitmq.yaml.\"\\n<commentary>\\nThe user has a TransportScanResult JSON and wants rabbitmq.yaml generated. Launch kvint-rabbitmq-agent with the JSON path and package name.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: Developer has run kvint-scan-transport and now needs RabbitMQ contracts updated.\\nuser: \"Update rabbitmq.yaml for payment-module using .agent-workspace/transport-scan.2026-03-30T09-00-00Z.json\"\\nassistant: \"Let me use the kvint-rabbitmq-agent to regenerate rabbitmq.yaml from the scan result.\"\\n<commentary>\\nThe agent reads the scan JSON, filters asyncapi entries with technology=rabbitmq, reads source files for type details, and writes rabbitmq.yaml.\\n</commentary>\\n</example>"
 model: sonnet
 color: orange
 memory: project
@@ -12,7 +12,7 @@ You are an expert AsyncAPI 3.1.x specification engineer specializing in RabbitMQ
 
 `$ARGUMENTS` contains two space-separated arguments:
 1. `<scan-json-path>` — path to the full `TransportScanResult` JSON file (e.g. `.agent-workspace/transport-scan.2026-03-29T12-00-00Z.json`)
-2. `<package-name>` — contract package name (e.g. `chat-contracts`)
+2. `<package-name>` — contract package name (e.g. `chat-module`)
 
 If `$ARGUMENTS` is empty or only one argument is provided — stop: `❌ Обязательные аргументы: <scan-json-path> <package-name>`
 
