@@ -1,3 +1,5 @@
-export default function Home() {
-  return <div>Hi</div>;
-}
+import { HomePage } from "@/pages/home";
+
+const Home = () => <HomePage />;
+
+export default Home;

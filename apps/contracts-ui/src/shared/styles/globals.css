@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@layer base {
+  @import "@xyflow/react/dist/style.css";
+}
 
 :root {
   --background: #ffffff;
