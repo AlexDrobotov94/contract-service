@@ -83,6 +83,8 @@ From the target controller's entries (filtered from `byContractType.openapi` whe
 
 Skip primitives: `string`, `number`, `boolean`, `void`, `null`, `any`, `unknown`, `object`.
 
+**Источник типов — только scan result.** Если `entry.endpoint.bodyType` или `entry.endpoint.responseType` отсутствует (null, пустая строка, `undefined`) — не добавляй этот тип в список. Не читай тело метода контроллера для вывода типа — только имена из аннотаций сигнатуры.
+
 ---
 
 ## Phase 3: Resolve types — framework-specific
@@ -324,6 +326,7 @@ Show `⚠️` only if there are unresolved types:
 - Never modify source files
 - All `$ref` values must reference a schema present in this partial's `components/schemas`
 - Do not invent field names — only use what is found in source files
+- **Если `bodyType`/`responseType` был null/пустым в scan result** — не добавляй `$ref` совсем: `requestBody` опускается, `responses` пишется без `content` (`200: { description: "Response schema not typed" }` или `204` для `void`)
 - If a type file has multiple candidates, prefer the one imported by the controller file
 - Path parameters in the path string must have a corresponding `parameters` entry
 - If `.claim` file write fails for any reason — do not proceed with processing (stop and report error)

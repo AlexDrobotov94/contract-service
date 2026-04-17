@@ -39,6 +39,8 @@ For each unique `entry.file` across filtered entries:
 - Find payload type definitions for each `endpoint.payloadType` and `endpoint.replyType`
 - Also scan for publisher calls (`amqpService.publish()`, `channel.publish()`, `this.client.send()`, `this.client.emit()`, etc.) that represent **send** operations — these may not appear as separate scan entries but exist in the same files
 
+**Только явно объявленные типы.** Если `endpoint.payloadType` или `endpoint.replyType` пуст, null или `any` — не анализируй тело обработчика для вывода структуры. Записывай `type: object, additionalProperties: true` и проставляй `x-quality-payload-typed: false`. Не угадывай поля из параметров функции или из логики обработчика.
+
 ## Phase 2: Build operation inventory
 
 **Receive operations** (consumed by this service): come from scan entries — each entry with a handler decorator (`@MessagePattern`, `@EventPattern`, `@RabbitSubscribe`, `@Process`) is a receive operation. Extract from each entry:

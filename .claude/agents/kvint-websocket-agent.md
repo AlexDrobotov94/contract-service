@@ -35,6 +35,8 @@ For each unique `entry.file` across filtered entries:
 - Look for message type discriminator patterns: interfaces with a `type` literal field + `payload` field
 - Look for union types that enumerate all message kinds (e.g. `InboundMessage = CreateOrderMessage | JoinRoomMessage`)
 
+**Только явно объявленные типы.** Если `endpoint.payloadType` пуст, null или `any` — не анализируй тело обработчика для вывода структуры. Записывай `type: object, additionalProperties: true` и проставляй `x-quality-payload-typed: false`. Не угадывай поля из параметров функции или из логики обработчика.
+
 Convert each found TypeScript type to JSON Schema (see conversion rules below).
 
 **Native ws type convention:** In ws services, messages are typically structured as:

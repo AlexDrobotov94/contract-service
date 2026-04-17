@@ -34,6 +34,8 @@ For each unique `entry.file` across filtered entries:
 - For each entry's `endpoint.payloadType` and `endpoint.ackType` — find the TypeScript interface/type definition in the file
 - Also look for event type maps (e.g. `ServerToClientEvents`, `ClientToServerEvents` interfaces) that may define additional type details
 
+**Только явно объявленные типы.** Если `endpoint.payloadType` или `endpoint.ackType` пуст, null или `any` — не анализируй тело обработчика для вывода структуры. Записывай `type: object, additionalProperties: true` и проставляй `x-quality-payload-typed: false`. Не угадывай поля из параметров функции или из логики обработчика.
+
 Convert each found TypeScript type to JSON Schema (see conversion rules below).
 
 ## Phase 2: Build event inventory

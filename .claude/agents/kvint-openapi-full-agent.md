@@ -70,6 +70,8 @@ From ALL entries across ALL controller files, collect unique type names that nee
 
 Skip primitives: `string`, `number`, `boolean`, `void`, `null`, `any`, `unknown`, `object`.
 
+**Источник типов — только scan result.** Если `entry.endpoint.bodyType` или `entry.endpoint.responseType` отсутствует (null, пустая строка, `undefined`) — не добавляй этот тип в список. Не читай тело метода контроллера для вывода типа — только имена из аннотаций сигнатуры.
+
 Build a deduplicated list across all controllers.
 
 ---
@@ -267,13 +269,17 @@ components:
           type: string
 ```
 
-Unresolved types:
+Unresolved types (имя было в scan result, но файл определения не найден):
 ```yaml
 UnresolvedType:
   type: object
   description: "Schema not resolved — source definition not found"
   additionalProperties: true
 ```
+
+**Если `bodyType`/`responseType` был null/пустым в scan result** — не добавляй `$ref` совсем:
+- `requestBody` — опускай блок целиком
+- `responses` — пиши `200: { description: "Response schema not typed" }` без `content` (или `204` если метод явно `void`)
 
 ---
 

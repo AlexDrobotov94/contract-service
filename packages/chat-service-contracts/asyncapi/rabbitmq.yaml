@@ -79,11 +79,15 @@ channels:
 operations:
   publishDialingTask:
     action: send
+    summary: Отправить задачу дозвона дайлеру
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Дайлер
     channel:
       $ref: "#/channels/dialerQueue"
-    summary: Отправить задачу дозвона дайлеру
     description: >
       Публикует задачу дозвона в очередь kv.dialer.rabbitmq. correlationId = sessionId.
       replyTo = kv.chat-service.dev.replies.
@@ -97,11 +101,15 @@ operations:
 
   publishHandleMessage:
     action: send
+    summary: Отправить сообщение пользователя боту
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Сессии
     channel:
       $ref: "#/channels/botInstanceQueue"
-    summary: Отправить сообщение пользователя боту
     description: >
       Публикует запрос handle_message в динамическую очередь экземпляра бота.
       correlationId берётся из контекста сессии. replyTo = kv.chat-service.dev.replies.
@@ -115,11 +123,15 @@ operations:
 
   publishCloseSession:
     action: send
+    summary: Отправить запрос закрытия сессии боту
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Сессии
     channel:
       $ref: "#/channels/botInstanceQueue"
-    summary: Отправить запрос закрытия сессии боту
     description: >
       Публикует запрос close_session в динамическую очередь экземпляра бота.
       correlationId берётся из контекста сессии. replyTo = kv.chat-service.dev.replies.
@@ -133,11 +145,15 @@ operations:
 
   consumeCreateSessionReply:
     action: receive
+    summary: Получить ответ бота на создание сессии
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: true
+    x-quality-contract-implemented: false
     tags:
       - name: Сессии
     channel:
       $ref: "#/channels/chatServiceRepliesQueue"
-    summary: Получить ответ бота на создание сессии
     description: >
       Ответ бота с func = create_session. Содержит instance_queue — имя очереди
       экземпляра бота, которая используется для последующих handle_message и close_session.
@@ -151,11 +167,15 @@ operations:
 
   consumeHandleMessageReply:
     action: receive
+    summary: Получить ответ бота на обработку сообщения
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: true
+    x-quality-contract-implemented: false
     tags:
       - name: Сессии
     channel:
       $ref: "#/channels/chatServiceRepliesQueue"
-    summary: Получить ответ бота на обработку сообщения
     description: >
       Ответ бота с func = handle_message. Содержит generated_text — ответный текст бота,
       а также флаги is_final_state и is_operator_state.
@@ -169,11 +189,15 @@ operations:
 
   consumeCloseSessionReply:
     action: receive
+    summary: Получить ответ бота на закрытие сессии
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Сессии
     channel:
       $ref: "#/channels/chatServiceRepliesQueue"
-    summary: Получить ответ бота на закрытие сессии
     description: >
       Ответ бота с func = close_session. В текущей реализации обработчик не выполняет действий
       (TODO в источнике), но канал задокументирован для полноты контракта.
@@ -184,6 +208,16 @@ operations:
         bindingVersion: "0.3.0"
     messages:
       - $ref: "#/channels/chatServiceRepliesQueue/messages/closeSessionReply"
+
+x-quality-summary:
+  total: 6
+  scores:
+    payload-typed: { yes: 6, no: 0, na: 0 }
+    payload-validated: { yes: 0, no: 6, na: 0 }
+    errors-defined: { yes: 2, no: 4, na: 0 }
+    contract-implemented: { yes: 0, no: 6, na: 0 }
+  generatedAt: "2026-04-17T10:00:00Z"
+  generatedBy: kvint-rabbitmq-agent
 
 components:
   messages:

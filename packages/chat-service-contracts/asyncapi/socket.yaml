@@ -85,6 +85,10 @@ operations:
   chatJoinReceive:
     action: receive
     summary: Клиент входит в чат
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: true
+    x-quality-contract-implemented: false
     tags:
       - name: Чат
     channel:
@@ -95,6 +99,10 @@ operations:
   chatLeaveReceive:
     action: receive
     summary: Клиент выходит из чата
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Чат
     channel:
@@ -105,6 +113,10 @@ operations:
   chatUpdatedSend:
     action: send
     summary: Уведомление об изменении чата
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Чат
     channel:
@@ -115,6 +127,10 @@ operations:
   messageSendReceive:
     action: receive
     summary: Клиент отправляет сообщение
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: true
+    x-quality-contract-implemented: false
     tags:
       - name: Сообщения
     channel:
@@ -125,6 +141,10 @@ operations:
   timelineCatchupSend:
     action: send
     summary: Синхронизация таймлайна при подключении
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Таймлайн
     channel:
@@ -135,6 +155,10 @@ operations:
   timelineNewSend:
     action: send
     summary: Новый элемент таймлайна
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Таймлайн
     channel:
@@ -145,6 +169,10 @@ operations:
   processingCatchupReceive:
     action: receive
     summary: Клиент запрашивает состояние обработки
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: true
+    x-quality-contract-implemented: false
     tags:
       - name: Обработка
     channel:
@@ -155,6 +183,10 @@ operations:
   processingUpdatedSend:
     action: send
     summary: Обновление статуса обработки сообщения
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Обработка
     channel:
@@ -165,12 +197,26 @@ operations:
   previewNewSend:
     action: send
     summary: Новый фрагмент стриминга ответа
+    x-quality-payload-typed: true
+    x-quality-payload-validated: false
+    x-quality-errors-defined: false
+    x-quality-contract-implemented: false
     tags:
       - name: Стриминг
     channel:
       $ref: "#/channels/preview_new"
     messages:
       - $ref: "#/channels/preview_new/messages/preview_newMessage"
+
+x-quality-summary:
+  total: 9
+  scores:
+    payload-typed: { yes: 9, no: 0, na: 0 }
+    payload-validated: { yes: 0, no: 9, na: 0 }
+    errors-defined: { yes: 3, no: 6, na: 0 }
+    contract-implemented: { yes: 0, no: 9, na: 0 }
+  generatedAt: "2026-04-17T10:00:00Z"
+  generatedBy: kvint-socketio-agent
 
 components:
   messages:
