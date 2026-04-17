@@ -104,4 +104,18 @@ export interface ServiceDescriptor {
      */
     description?: string;
   }[];
+  /**
+   * Оценка качества компонента, выставляется агентом автоматически.
+   */
+  quality?: {
+    /**
+     * Оценка качества для website-компонентов.
+     */
+    website?: {
+      /**
+       * Фронт импортирует хотя бы один catalog-пакет монорепо (import/require найден в исходниках).
+       */
+      'contract-imported': boolean;
+    };
+  };
 }

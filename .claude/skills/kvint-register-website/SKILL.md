@@ -67,7 +67,14 @@ description: Use this skill ONLY when the user explicitly invokes /kvint-registe
 
 Скилл задаёт вопросы в текущем диалоге — пользователь отвечает напрямую. Жди завершения скилла.
 
-### Шаг 6. Итог
+### Шаг 6. Оценка качества
+
+Запусти агент `kvint-website-quality-agent`, передав аргументом:
+`<appPath> packages/<slug>-module`
+
+Жди завершения агента перед переходом к следующему шагу.
+
+### Шаг 7. Итог
 
 Выведи итоговое сообщение:
 ```
@@ -95,5 +102,6 @@ description: Use this skill ONLY when the user explicitly invokes /kvint-registe
 |-----|--------------------|
 | 3. Скаффолдинг | `packages/<slug>-module/package.json` существует |
 | 5. service.yaml | `packages/<slug>-module/metadata/service.yaml` существует |
+| 6. Quality | `quality.website` присутствует в `packages/<slug>-module/metadata/service.yaml` |
 
 Сообщи пользователю, с какого шага продолжаешь.
