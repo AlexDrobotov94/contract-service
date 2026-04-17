@@ -10,6 +10,7 @@ import {
   DefaultEdgeOptions,
   Edge,
   FitViewOptions,
+  MarkerType,
   Node,
   NodeTypes,
   OnConnect,
@@ -21,9 +22,13 @@ import {
 import { useCallback, useState } from "react";
 import { ServiceNodeComponent } from "./custom-node";
 import { ServiceEdge, ServiceNode } from "../model/types";
+import { ServiceEdgeComponent } from "./custom-edge";
 
 const nodeTypes: NodeTypes = {
   service: ServiceNodeComponent,
+};
+const edgeTypes = {
+  "service-edge": ServiceEdgeComponent,
 };
 
 const initialNodes: ServiceNode[] = [
@@ -60,10 +65,9 @@ const fitViewOptions: FitViewOptions = {
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
   animated: true,
-};
-
-const onNodeDrag: OnNodeDrag = (_, node) => {
-  console.log("drag event", node.data);
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+  },
 };
 
 export const ReactFlowSandbox = () => {
@@ -78,10 +82,26 @@ export const ReactFlowSandbox = () => {
     (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
     [setEdges],
   );
-  const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges],
-  );
+  const onConnect: OnConnect = useCallback((connection) => {
+    if (!connection.source || !connection.target) {
+      return;
+    }
+
+    const newEdge: ServiceEdge = {
+      id: `${connection.source}-${connection.target}`,
+      type: "service-edge",
+      source: connection.source,
+      target: connection.target,
+      sourceHandle: connection.sourceHandle ?? null,
+      targetHandle: connection.targetHandle ?? null,
+      data: {
+        label: "New connection",
+        protocol: "http",
+      },
+    };
+
+    setEdges((eds) => addEdge(newEdge, eds));
+  }, []);
 
   return (
     <div className="w-[90dvw] h-[90dvh] border-2 border-solid border-gray-500">
@@ -89,10 +109,10 @@ export const ReactFlowSandbox = () => {
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeDrag={onNodeDrag}
         fitView
         fitViewOptions={fitViewOptions}
         defaultEdgeOptions={defaultEdgeOptions}
