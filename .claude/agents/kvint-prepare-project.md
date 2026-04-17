@@ -1,6 +1,6 @@
 ---
 name: kvint-prepare-project
-description: "Prepares a cloned EXTERNAL project for contract scanning: switches to the correct branch, detects language and monorepo structure, installs dependencies, and returns the path to the target application. Use before running any contract scanning or generation agents (OpenAPI, AsyncAPI, gRPC, etc.).\n\nCRITICAL: This agent MUST ONLY be invoked when the user explicitly provides a path to an EXTERNAL repository (e.g. /tmp/some-service, C:/repos/other-service). NEVER invoke this agent for the current working repository. NEVER invoke without an explicit external path in the user's message — if no path is provided, ask the user to specify the path instead of launching this agent.\n\n<example>\nContext: Need to prepare a Node.js monorepo for scanning.\nuser: \"Подготовь проект по пути /tmp/my-service для сканирования\"\nassistant: \"Запускаю kvint-prepare-project для /tmp/my-service\"\n<commentary>\nUse kvint-prepare-project to prepare the project before contract scanning.\n</commentary>\n</example>\n\n<example>\nContext: Need to prepare a specific branch.\nuser: \"Подготовь /tmp/my-service ветку develop\"\nassistant: \"Запускаю kvint-prepare-project с путём /tmp/my-service и веткой develop\"\n<commentary>\nPass both path and branch to kvint-prepare-project.\n</commentary>\n</example>\n\n<example>\nContext: User asks to prepare a project WITHOUT providing a path.\nuser: \"Подготовь проект к сканированию\"\nassistant: \"Укажи путь к внешнему репозиторию, который нужно подготовить (например, /tmp/my-service).\"\n<commentary>\nDO NOT launch kvint-prepare-project without a path. Ask the user for the path first.\n</commentary>\n</example>"
+description: "Prepares a cloned EXTERNAL project for contract scanning or website registration: switches to the correct branch, detects language and monorepo structure, installs dependencies, and returns the path to the target application. Supports --type=website flag to detect frontend apps (Next.js, Vite/React, Webpack/React) instead of backend entry points. Use before running any contract scanning, generation agents (OpenAPI, AsyncAPI, gRPC, etc.), or website registration skill.\n\nCRITICAL: This agent MUST ONLY be invoked when the user explicitly provides a path to an EXTERNAL repository (e.g. /tmp/some-service, C:/repos/other-service). NEVER invoke this agent for the current working repository. NEVER invoke without an explicit external path in the user's message — if no path is provided, ask the user to specify the path instead of launching this agent.\n\n<example>\nContext: Need to prepare a Node.js monorepo for scanning.\nuser: \"Подготовь проект по пути /tmp/my-service для сканирования\"\nassistant: \"Запускаю kvint-prepare-project для /tmp/my-service\"\n<commentary>\nUse kvint-prepare-project to prepare the project before contract scanning.\n</commentary>\n</example>\n\n<example>\nContext: Need to prepare a specific branch.\nuser: \"Подготовь /tmp/my-service ветку develop\"\nassistant: \"Запускаю kvint-prepare-project с путём /tmp/my-service и веткой develop\"\n<commentary>\nPass both path and branch to kvint-prepare-project.\n</commentary>\n</example>\n\n<example>\nContext: User asks to prepare a project WITHOUT providing a path.\nuser: \"Подготовь проект к сканированию\"\nassistant: \"Укажи путь к внешнему репозиторию, который нужно подготовить (например, /tmp/my-service).\"\n<commentary>\nDO NOT launch kvint-prepare-project without a path. Ask the user for the path first.\n</commentary>\n</example>"
 tools: Bash, Glob, Grep, Read, Write
 model: sonnet
 color: purple
@@ -28,17 +28,19 @@ color: purple
 
 ## Формат входных данных
 
-`$ARGUMENTS` содержит: `<projectPath> [<branch>] [--install-deps]`
+`$ARGUMENTS` содержит: `<projectPath> [<branch>] [--install-deps] [--type=website]`
 
 Примеры:
 - `/tmp/my-service` — только путь
 - `/tmp/my-service develop` — путь + ветка
 - `/tmp/my-service feature/new-api` — путь + ветка со слэшем
 - `/tmp/my-service develop --install-deps` — принудительная установка зависимостей (актуально для Go)
+- `/tmp/my-site --type=website` — режим поиска фронтенд-приложения
 
 Правило парсинга:
 - Первый токен — путь
 - Если среди токенов есть `--install-deps` — запомни флаг `installDeps = true` и убери его из строки
+- Если среди токенов есть `--type=website` — запомни флаг `websiteMode = true` и убери его из строки
 - Всё оставшееся после первого пробела — название ветки (опционально)
 
 ---
@@ -100,6 +102,17 @@ cd "<projectPath>" && git checkout <branch>
 
 Если найден `nest-cli.json` — запомни `framework = NestJS` (используется в Фазах 4 и 5).
 
+**Дополнительно — фронтенд-маркеры** (проверяются поверх языка Node.js, в корне и на первом уровне):
+
+| Файл | Фреймворк |
+|------|-----------|
+| `next.config.js` / `next.config.ts` / `next.config.mjs` | Next.js |
+| `vite.config.ts` / `vite.config.js` | Vite/React |
+| `webpack.config.js` / `webpack.config.ts` | Webpack/React |
+| `package.json` содержит `"react-scripts"` в `scripts` | CRA/React |
+
+Если найден фронтенд-маркер — запомни `frontendFramework = <Next.js | Vite/React | Webpack/React>`.
+
 Если язык не распознан — добавь предупреждение и продолжай.
 
 ---
@@ -123,6 +136,42 @@ cd "<projectPath>" && git checkout <branch>
 ---
 
 ## Фаза 5: Поиск целевого приложения (только для монорепо)
+
+### Режим `--type=website` (websiteMode = true)
+
+Обойди `apps/` и `packages/` (глубина 1). Для каждой поддиректории проверь наличие фронтенд-маркеров в порядке приоритета:
+1. `next.config.js` / `next.config.ts` / `next.config.mjs` → Next.js
+2. `vite.config.ts` / `vite.config.js` → Vite/React
+3. `webpack.config.js` / `webpack.config.ts` → Webpack/React
+4. `package.json` с `"react-scripts"` в `scripts` → CRA/React
+5. `package.json` с `"react"` в `dependencies` → React (fallback)
+
+Собери список всех найденных фронтенд-приложений.
+
+**Если найдено ровно одно:**
+Установи `appPath` на него и продолжай в обычном режиме.
+
+**Если найдено несколько:**
+Установи `appPath = первый по алфавиту` (дефолт), выведи обычный итог Фазы 7, а **в конце** добавь машиночитаемый блок:
+```
+MULTIPLE_APPS
+<относительный путь>|<фреймворк>
+<относительный путь>|<фреймворк>
+...
+```
+Пример:
+```
+MULTIPLE_APPS
+apps/admin|Next.js
+apps/client|Vite/React
+```
+
+**Если ни одного фронтенд-маркера в поддиректориях не найдено:**
+Проверь корень репозитория — если там есть фронтенд-маркер, используй корень как `appPath`. Иначе добавь предупреждение и используй корень как `appPath`.
+
+---
+
+### Стандартный режим (без --type=website)
 
 **NestJS монорепо (framework = NestJS и monorepo: true):**
 Прочитай поле `projects` из `nest-cli.json`. Каждый проект содержит `root` — относительный путь от корня репозитория. Выбери проект с типом `application` (не `library`). Если несколько — предпочти тот, чьё имя совпадает с именем репозитория, иначе первый по алфавиту и перечисли остальные в предупреждении. `appPath = projectPath + "/" + project.root`.
