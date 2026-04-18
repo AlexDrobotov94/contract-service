@@ -50,7 +50,10 @@
       "Bash(gh api *)",
       "WebFetch(domain:www.eclipse.org)",
       "WebFetch(domain:eclipse.dev)",
-      "WebFetch(domain:reactflow.dev)"
+      "WebFetch(domain:reactflow.dev)",
+      "Bash(cp -r \"C:/Users/Alex24/.claude/plugins/user-local/skills/context7-mcp\" \"D:/kvint-for-contracts/contract-service/.claude/skills/\")",
+      "Bash(cp -r \"C:/Users/Alex24/.claude/plugins/user-local/skills/elkjs-reference\" \"D:/kvint-for-contracts/contract-service/.claude/skills/\")",
+      "Bash(cp -r \"C:/Users/Alex24/.claude/plugins/user-local/skills/react-flow-reference\" \"D:/kvint-for-contracts/contract-service/.claude/skills/\")"
     ]
   }
 }

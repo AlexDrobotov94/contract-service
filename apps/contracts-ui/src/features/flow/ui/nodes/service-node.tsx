@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { GraphPort, ServiceFlowNode } from "../model/types";
+import { GraphPort, ServiceFlowNode } from "../../model/types";
 
 function getHandlePosition(side: GraphPort["side"]): Position {
   switch (side) {

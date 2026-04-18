@@ -10,13 +10,14 @@ import {
   ReactFlow,
 } from "@xyflow/react";
 import { useEffect, useState } from "react";
-import { ServiceNode } from "./service-node";
-import { ServiceEdgeComponent } from "./servise-edge";
+import { ServiceNode } from "./nodes/service-node";
+
 import { ServiceEdge, ServiceFlowNode } from "../model/types";
 import { buildServiceGraph } from "../model/build-service-graph";
 import { services } from "../model/constants";
 import { layoutServiceGraph } from "../model/layout-service-graph";
 import { mapElkGraphToReactFlow } from "../model/map-elk-graph-to-react-flow";
+import { ServiceEdgeComponent } from "./edges/servise-edge";
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -39,6 +40,7 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 export const ServiceFlowViewer = () => {
   const [nodes, setNodes] = useState<ServiceFlowNode[]>([]);
   const [edges, setEdges] = useState<ServiceEdge[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -48,10 +50,19 @@ export const ServiceFlowViewer = () => {
 
       setNodes(result.nodes);
       setEdges(result.edges);
+      setIsLoading(false);
     }
 
-    void load();
+    load().catch(() => setIsLoading(false));
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="w-[90dvw] h-[90dvh] border-2 border-solid border-gray-500 flex items-center justify-center">
+        <span className="text-muted-foreground text-sm">Загрузка графа...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="w-[90dvw] h-[90dvh] border-2 border-solid border-gray-500">
