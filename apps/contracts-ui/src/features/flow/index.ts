@@ -1,1 +1,1 @@
-export { ServiceFlowViewer } from "./ui/sertvices-flow";
+export { ServiceFlowViewer } from "./ui/services-flow";

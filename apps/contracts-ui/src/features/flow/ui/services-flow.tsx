@@ -17,7 +17,7 @@ import { buildServiceGraph } from "../model/build-service-graph";
 import { services } from "../model/constants";
 import { layoutServiceGraph } from "../model/layout-service-graph";
 import { mapElkGraphToReactFlow } from "../model/map-elk-graph-to-react-flow";
-import { ServiceEdgeComponent } from "./edges/servise-edge";
+import { ServiceEdgeComponent } from "./edges/service-edge";
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -71,9 +71,6 @@ export const ServiceFlowViewer = () => {
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        // onNodesChange={onNodesChange}
-        // onEdgesChange={onEdgesChange}
-        // onConnect={onConnect}
         fitView
         fitViewOptions={fitViewOptions}
         defaultEdgeOptions={defaultEdgeOptions}

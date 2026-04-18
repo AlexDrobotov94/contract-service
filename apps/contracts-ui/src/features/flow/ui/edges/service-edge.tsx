@@ -33,13 +33,7 @@ export const ServiceEdgeComponent = memo(
 
     const renderData = useCallback(() => {
       if (!data) return null;
-
-      return (
-        <div>
-          <div>{data.label}</div>
-          <div>{data.protocol}</div>
-        </div>
-      );
+      return <div>{data.protocol}</div>;
     }, [data]);
 
     return (

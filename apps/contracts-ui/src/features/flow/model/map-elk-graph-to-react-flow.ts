@@ -1,7 +1,8 @@
 import type { ElkExtendedEdge, ElkNode } from "elkjs/lib/elk-api";
 
 import type {
-  GraphPort,
+  GraphNode,
+  ReactFlowPortData,
   ServiceEdge,
   ServiceFlowNode,
   ServiceGraph,
@@ -32,21 +33,22 @@ function extractHandleIdFromPortId(portId: string): string {
 }
 
 function mapElkNodeToReactFlowNode(
-  node: ElkNode,
-  ports: GraphPort[],
+  elkNode: ElkNode,
+  graphNode: GraphNode,
 ): ServiceFlowNode {
+  const elkPortById = new Map(elkNode.ports?.map((p) => [p.id, p]) ?? []);
+
+  const ports: ReactFlowPortData[] = graphNode.ports.map((port) => {
+    const elkPort = elkPortById.get(`${elkNode.id}/${port.id}`);
+    return { ...port, x: elkPort?.x ?? 0, y: elkPort?.y ?? 0 };
+  });
+
   return {
-    id: node.id,
-    position: {
-      x: node.x ?? 0,
-      y: node.y ?? 0,
-    },
-    width: node.width,
-    height: node.height,
-    data: {
-      label: extractNodeLabel(node),
-      ports,
-    },
+    id: elkNode.id,
+    position: { x: elkNode.x ?? 0, y: elkNode.y ?? 0 },
+    width: elkNode.width,
+    height: elkNode.height,
+    data: { label: extractNodeLabel(elkNode), ports },
     type: "service",
   };
 }
@@ -68,10 +70,7 @@ function mapElkEdgeToReactFlowEdge(edge: ElkExtendedEdge): ServiceEdge {
     sourceHandle: extractHandleIdFromPortId(sourcePortId),
     targetHandle: extractHandleIdFromPortId(targetPortId),
     type: "service-edge",
-    data: {
-      label: edge.labels?.[0]?.text ?? "",
-      protocol,
-    },
+    data: { protocol },
   };
 }
 
@@ -91,7 +90,7 @@ export function mapElkGraphToReactFlow(
       throw new Error(`Нода "${elkNode.id}" отсутствует в ServiceGraph`);
     }
 
-    return mapElkNodeToReactFlowNode(elkNode, graphNode.ports);
+    return mapElkNodeToReactFlowNode(elkNode, graphNode);
   });
 
   const edges: ServiceEdge[] = elkEdges.map(mapElkEdgeToReactFlowEdge);

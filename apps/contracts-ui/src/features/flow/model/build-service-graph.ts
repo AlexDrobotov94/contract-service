@@ -16,7 +16,7 @@ function createInPort(protocol: Protocol): GraphPort {
     id: getPortId(protocol, "in"),
     protocol,
     direction: "in",
-    side: "WEST",
+    side: "NORTH",
   };
 }
 
@@ -25,7 +25,7 @@ function createOutPort(protocol: Protocol): GraphPort {
     id: getPortId(protocol, "out"),
     protocol,
     direction: "out",
-    side: "EAST",
+    side: "SOUTH",
   };
 }
 

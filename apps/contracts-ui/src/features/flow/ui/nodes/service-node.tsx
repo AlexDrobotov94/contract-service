@@ -1,12 +1,12 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { GraphPort, ServiceFlowNode } from "../../model/types";
+import { ReactFlowPortData, ServiceFlowNode } from "../../model/types";
 
-function getHandlePosition(side: GraphPort["side"]): Position {
+function getHandlePosition(side: ReactFlowPortData["side"]): Position {
   switch (side) {
-    case "WEST":
-      return Position.Left;
-    case "EAST":
-      return Position.Right;
+    case "NORTH":
+      return Position.Top;
+    case "SOUTH":
+      return Position.Bottom;
   }
 }
 
@@ -30,6 +30,7 @@ export function ServiceNode({ data }: NodeProps<ServiceFlowNode>) {
           id={port.id}
           type={port.direction === "in" ? "target" : "source"}
           position={getHandlePosition(port.side)}
+          style={{ left: port.x + 5 }}
         />
       ))}
 
