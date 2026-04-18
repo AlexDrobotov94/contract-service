@@ -1,4 +1,3 @@
-// apps\contracts-ui\src\pages\home\ui\snadbox.tsx
 "use client";
 
 import { ZoomSlider } from "@/shared/ui/atoms/zoom-slider";
@@ -11,15 +10,13 @@ import {
   ReactFlow,
 } from "@xyflow/react";
 import { useEffect, useState } from "react";
-
-import { ServiceEdgeComponent } from "./custom-edge";
-import { buildServiceGraph } from "@/features/flow/model/build-service-graph";
-import { services } from "@/features/flow/model/constants";
-import { layoutServiceGraph } from "@/features/flow/model/layout-service-graph";
-import { mapElkGraphToReactFlow } from "@/features/flow/model/map-elk-graph-to-react-flow";
-import { ServiceEdge, ServiceFlowNode } from "@/features/flow/model/types";
-import { ServiceNode } from "@/features/flow/ui/service-node";
-// import { ServiceEdge } from "../model/types";
+import { ServiceNode } from "./service-node";
+import { ServiceEdgeComponent } from "./servise-edge";
+import { ServiceEdge, ServiceFlowNode } from "../model/types";
+import { buildServiceGraph } from "../model/build-service-graph";
+import { services } from "../model/constants";
+import { layoutServiceGraph } from "../model/layout-service-graph";
+import { mapElkGraphToReactFlow } from "../model/map-elk-graph-to-react-flow";
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -39,7 +36,7 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
   },
 };
 
-export const ReactFlowSandbox = () => {
+export const ServiceFlowViewer = () => {
   const [nodes, setNodes] = useState<ServiceFlowNode[]>([]);
   const [edges, setEdges] = useState<ServiceEdge[]>([]);
 

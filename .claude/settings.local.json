@@ -46,7 +46,11 @@
       "Bash(npm run *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/contracts)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/contracts/http/chat-service)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/contracts/http/dialer-service)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/contracts/http/dialer-service)",
+      "Bash(gh api *)",
+      "WebFetch(domain:www.eclipse.org)",
+      "WebFetch(domain:eclipse.dev)",
+      "WebFetch(domain:reactflow.dev)"
     ]
   }
 }

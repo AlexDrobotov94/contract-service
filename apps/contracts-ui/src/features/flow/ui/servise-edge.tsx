@@ -7,7 +7,7 @@ import {
   getBezierPath,
   type EdgeProps,
 } from "@xyflow/react";
-import type { ServiceEdge } from "../model/types";
+import { ServiceEdge } from "../model/types";
 
 export const ServiceEdgeComponent = memo(
   ({
