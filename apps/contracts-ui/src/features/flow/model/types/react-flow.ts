@@ -17,3 +17,7 @@ export type ServiceEdgeData = {
 };
 
 export type ServiceEdge = Edge<ServiceEdgeData, "service-edge">;
+
+export type EmbedEdgeData = Record<string, never>;
+
+export type EmbedEdge = Edge<EmbedEdgeData, "embed-edge">;

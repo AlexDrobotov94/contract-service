@@ -2,6 +2,7 @@ import type { ElkExtendedEdge, ElkNode } from "elkjs/lib/elk-api";
 import { MarkerType } from "@xyflow/react";
 
 import type {
+  EmbedEdge,
   GraphNode,
   ReactFlowPortData,
   ServiceEdge,
@@ -56,7 +57,7 @@ function mapElkNodeToReactFlowNode(
   };
 }
 
-function mapElkEdgeToReactFlowEdge(edge: ElkExtendedEdge): ServiceEdge {
+function mapElkEdgeToReactFlowEdge(edge: ElkExtendedEdge): ServiceEdge | EmbedEdge {
   const sourcePortId = edge.sources?.[0];
   const targetPortId = edge.targets?.[0];
 
@@ -64,7 +65,22 @@ function mapElkEdgeToReactFlowEdge(edge: ElkExtendedEdge): ServiceEdge {
     throw new Error(`У ребра "${edge.id}" отсутствует source или target port`);
   }
 
-  const protocol = (edge.labels?.[0]?.text ?? "http") as Protocol;
+  const label = edge.labels?.[0]?.text ?? "http";
+
+  if (label === "embeds") {
+    return {
+      id: edge.id,
+      source: extractNodeIdFromPortId(sourcePortId),
+      target: extractNodeIdFromPortId(targetPortId),
+      sourceHandle: extractHandleIdFromPortId(sourcePortId),
+      targetHandle: extractHandleIdFromPortId(targetPortId),
+      type: "embed-edge",
+      data: {},
+      markerEnd: { type: MarkerType.ArrowClosed },
+    };
+  }
+
+  const protocol = label as Protocol;
   const direction = PROTOCOL_EDGE_DIRECTION[protocol];
   const marker = { type: MarkerType.ArrowClosed };
 
@@ -84,7 +100,7 @@ function mapElkEdgeToReactFlowEdge(edge: ElkExtendedEdge): ServiceEdge {
 export function mapElkGraphToReactFlow(
   layoutedGraph: ElkNode,
   graph: ServiceGraph,
-): { nodes: ServiceFlowNode[]; edges: ServiceEdge[] } {
+): { nodes: ServiceFlowNode[]; edges: (ServiceEdge | EmbedEdge)[] } {
   const elkNodes = layoutedGraph.children ?? [];
   const elkEdges = (layoutedGraph.edges ?? []) as ElkExtendedEdge[];
 
@@ -100,7 +116,7 @@ export function mapElkGraphToReactFlow(
     return mapElkNodeToReactFlowNode(elkNode, graphNode);
   });
 
-  const edges: ServiceEdge[] = elkEdges.map(mapElkEdgeToReactFlowEdge);
+  const edges = elkEdges.map(mapElkEdgeToReactFlowEdge);
 
   return { nodes, edges };
 }

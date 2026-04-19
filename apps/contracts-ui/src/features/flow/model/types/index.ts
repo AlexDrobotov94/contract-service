@@ -2,6 +2,7 @@ export type { Protocol } from "./protocol";
 export type { ServiceDependency, ServiceNode } from "./service";
 export type {
   GraphEdge,
+  GraphEdgeKind,
   GraphNode,
   GraphPort,
   GraphPortDirection,
@@ -9,6 +10,8 @@ export type {
   ServiceGraph,
 } from "./graph";
 export type {
+  EmbedEdge,
+  EmbedEdgeData,
   ReactFlowNodeData,
   ReactFlowPortData,
   ServiceEdge,

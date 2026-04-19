@@ -11,18 +11,20 @@ import {
 import { useEffect, useState } from "react";
 import { ServiceNode } from "./nodes/service-node";
 
-import { ServiceEdge, ServiceFlowNode } from "../model/types";
+import { EmbedEdge, ServiceEdge, ServiceFlowNode } from "../model/types";
 import { buildServiceGraph } from "../model/build-service-graph";
 import { services } from "../model/constants";
 import { layoutServiceGraph } from "../model/layout-service-graph";
 import { mapElkGraphToReactFlow } from "../model/map-elk-graph-to-react-flow";
 import { ServiceEdgeComponent } from "./edges/service-edge";
+import { EmbedEdgeComponent } from "./edges/embed-edge";
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
 };
 const edgeTypes = {
   "service-edge": ServiceEdgeComponent,
+  "embed-edge": EmbedEdgeComponent,
 };
 
 const fitViewOptions: FitViewOptions = {
@@ -35,7 +37,7 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 
 export const ServiceFlowViewer = () => {
   const [nodes, setNodes] = useState<ServiceFlowNode[]>([]);
-  const [edges, setEdges] = useState<ServiceEdge[]>([]);
+  const [edges, setEdges] = useState<(ServiceEdge | EmbedEdge)[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -54,14 +56,14 @@ export const ServiceFlowViewer = () => {
 
   if (isLoading) {
     return (
-      <div className="w-[90dvw] h-[90dvh] border-2 border-solid border-gray-500 flex items-center justify-center">
+      <div className="w-dvw h-dvh border-2 border-solid border-gray-500 flex items-center justify-center">
         <span className="text-muted-foreground text-sm">Загрузка графа...</span>
       </div>
     );
   }
 
   return (
-    <div className="w-[90dvw] h-[90dvh] border-2 border-solid border-gray-500">
+    <div className="w-dvw h-dvh border-2 border-solid border-gray-500">
       <ReactFlow
         nodes={nodes}
         edges={edges}

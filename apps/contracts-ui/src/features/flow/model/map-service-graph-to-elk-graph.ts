@@ -53,7 +53,7 @@ function mapGraphEdgeToElkEdge(edge: GraphEdge): ElkExtendedEdge {
     id: edge.id,
     sources: [buildElkPortId(edge.sourceNodeId, edge.sourcePortId)],
     targets: [buildElkPortId(edge.targetNodeId, edge.targetPortId)],
-    labels: [createEdgeLabel(edge.protocol)],
+    labels: [createEdgeLabel(edge.protocol === "embed" ? "embeds" : edge.protocol)],
   };
 }
 
@@ -65,8 +65,8 @@ export function mapServiceGraphToElkGraph(graph: ServiceGraph): ElkNode {
       "elk.direction": "DOWN",
       "elk.edgeRouting": "ORTHOGONAL",
       "elk.portConstraints": "FIXED_SIDE",
-      "elk.layered.spacing.nodeNodeBetweenLayers": "80",
-      "elk.spacing.nodeNode": "40",
+      "elk.layered.spacing.nodeNodeBetweenLayers": "40",
+      "elk.spacing.nodeNode": "20",
     },
     children: graph.nodes.map(mapGraphNodeToElkNode),
     edges: graph.edges.map(mapGraphEdgeToElkEdge),

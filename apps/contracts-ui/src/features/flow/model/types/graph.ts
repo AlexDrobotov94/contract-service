@@ -3,9 +3,11 @@ import type { Protocol } from "./protocol";
 export type GraphPortDirection = "in" | "out";
 export type GraphPortSide = "NORTH" | "SOUTH";
 
+export type GraphEdgeKind = Protocol | "embed";
+
 export type GraphPort = {
   id: string;
-  protocol: Protocol;
+  protocol: GraphEdgeKind;
   direction: GraphPortDirection;
   side: GraphPortSide;
 };
@@ -24,7 +26,7 @@ export type GraphEdge = {
   sourcePortId: string;
   targetNodeId: string;
   targetPortId: string;
-  protocol: Protocol;
+  protocol: GraphEdgeKind;
 };
 
 export type ServiceGraph = {

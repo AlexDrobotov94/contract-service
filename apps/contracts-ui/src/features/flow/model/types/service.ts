@@ -10,4 +10,5 @@ export type ServiceNode = {
   name: string;
   provides: Protocol[];
   consumesApis: ServiceDependency[];
+  embeds?: string[];
 };

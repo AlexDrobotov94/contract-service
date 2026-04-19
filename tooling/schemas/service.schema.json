@@ -172,6 +172,14 @@
       }
     },
 
+    "embeds": {
+      "type": "array",
+      "description": "MFE-компоненты, встраиваемые этим shell-приложением (Module Federation, iframe и т.п.).",
+      "items": {
+        "$ref": "services.schema.json#/definitions/serviceRef"
+      }
+    },
+
     "quality": {
       "type": "object",
       "additionalProperties": false,

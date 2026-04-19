@@ -1,59 +1,54 @@
 import { ServiceNode } from "./types";
-import type { Protocol } from "./types/protocol";
+import type { GraphEdgeKind } from "./types/graph";
 
 export type EdgeDirection = "forward" | "backward" | "bidirectional";
 
-export const PROTOCOL_EDGE_DIRECTION: Record<Protocol, EdgeDirection> = {
+export const PROTOCOL_EDGE_DIRECTION: Record<GraphEdgeKind, EdgeDirection> = {
   http: "forward",
   grpc: "forward",
   graphql: "forward",
   socket: "bidirectional",
   websocket: "bidirectional",
   rabbitmq: "backward",
+  embed: "forward",
 };
 
 export const services: ServiceNode[] = [
   {
-    id: "frontend",
-    name: "Frontend",
+    id: "portal-frontend",
+    name: "Portal Frontend",
     provides: [],
     consumesApis: [
-      { serviceId: "backend", protocol: "http" },
-      { serviceId: "backend", protocol: "socket" },
+      { serviceId: "portal-backend", protocol: "http" },
+      { serviceId: "portal-backend", protocol: "socket" },
     ],
+    embeds: ["mfe-chat"],
   },
   {
-    id: "backend",
-    name: "Backend",
+    id: "portal-backend",
+    name: "Portal Backend",
     provides: ["http", "socket"],
+    consumesApis: [],
+  },
+  {
+    id: "mfe-chat",
+    name: "MFE Chat",
+    provides: [],
     consumesApis: [
-      { serviceId: "orders", protocol: "http" },
-      { serviceId: "auth", protocol: "http" },
-      { serviceId: "notifications", protocol: "socket" },
+      { serviceId: "chat-service", protocol: "http" },
+      { serviceId: "chat-service", protocol: "socket" },
     ],
   },
   {
-    id: "orders",
-    name: "Orders",
-    provides: ["http"],
-    consumesApis: [{ serviceId: "payments", protocol: "http" }],
+    id: "chat-service",
+    name: "Chat Service",
+    provides: ["http", "socket"],
+    consumesApis: [{ serviceId: "dialer-service", protocol: "rabbitmq" }],
   },
   {
-    id: "auth",
-    name: "Auth",
-    provides: ["http"],
-    consumesApis: [],
-  },
-  {
-    id: "payments",
-    name: "Payments",
-    provides: ["http"],
-    consumesApis: [],
-  },
-  {
-    id: "notifications",
-    name: "Notifications",
-    provides: ["socket"],
+    id: "dialer-service",
+    name: "Dialer Service",
+    provides: ["rabbitmq"],
     consumesApis: [],
   },
 ];

@@ -1,5 +1,6 @@
 import {
   GraphEdge,
+  GraphEdgeKind,
   GraphNode,
   GraphPort,
   GraphPortDirection,
@@ -8,10 +9,10 @@ import {
   ServiceNode,
 } from "./types";
 
-function getPortId(protocol: Protocol, direction: GraphPortDirection): string {
+function getPortId(protocol: GraphEdgeKind, direction: GraphPortDirection): string {
   return `${protocol}-${direction}`;
 }
-function createInPort(protocol: Protocol): GraphPort {
+function createInPort(protocol: GraphEdgeKind): GraphPort {
   return {
     id: getPortId(protocol, "in"),
     protocol,
@@ -20,7 +21,7 @@ function createInPort(protocol: Protocol): GraphPort {
   };
 }
 
-function createOutPort(protocol: Protocol): GraphPort {
+function createOutPort(protocol: GraphEdgeKind): GraphPort {
   return {
     id: getPortId(protocol, "out"),
     protocol,
@@ -44,6 +45,10 @@ function buildNodePorts(service: ServiceNode): GraphPort[] {
     ports.push(createOutPort(protocol));
   }
 
+  if (service.embeds && service.embeds.length > 0) {
+    ports.push(createOutPort("embed"));
+  }
+
   return ports;
 }
 
@@ -58,12 +63,22 @@ function buildGraphNode(service: ServiceNode): GraphNode {
 }
 
 function buildGraphNodes(services: ServiceNode[]): GraphNode[] {
-  return services.map(buildGraphNode);
+  const embedTargets = new Set<string>(
+    services.flatMap((s) => s.embeds ?? []),
+  );
+
+  return services.map((service) => {
+    const node = buildGraphNode(service);
+    if (embedTargets.has(service.id)) {
+      node.ports.push(createInPort("embed"));
+    }
+    return node;
+  });
 }
 
 function buildEdgeId(
   sourceNodeId: string,
-  protocol: Protocol,
+  protocol: GraphEdgeKind,
   targetNodeId: string,
 ): string {
   return `${sourceNodeId}-${protocol}-${targetNodeId}`;
@@ -81,6 +96,17 @@ function buildGraphEdges(services: ServiceNode[]): GraphEdge[] {
         targetNodeId: dependency.serviceId,
         targetPortId: getPortId(dependency.protocol, "in"),
         protocol: dependency.protocol,
+      });
+    }
+
+    for (const targetId of service.embeds ?? []) {
+      edges.push({
+        id: buildEdgeId(service.id, "embed", targetId),
+        sourceNodeId: service.id,
+        sourcePortId: getPortId("embed", "out"),
+        targetNodeId: targetId,
+        targetPortId: getPortId("embed", "in"),
+        protocol: "embed",
       });
     }
   }
@@ -164,6 +190,11 @@ function validateGraph(services: ServiceNode[]): void {
         targetService,
         dependency.protocol,
       );
+    }
+
+    for (const targetId of service.embeds ?? []) {
+      const targetService = servicesById.get(targetId);
+      validateDependencyTargetExists(service, targetService, targetId);
     }
   }
 }

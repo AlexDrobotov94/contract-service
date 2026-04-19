@@ -75,12 +75,16 @@ consumesApis:                                     # optional — APIs this servi
   - service: other-service                        # must be registered in services.schema.json
     protocol: http                                # must match a protocol in that service's providesApis
     description: "Why this API is needed"
+embeds:                                           # optional — for type: website (shell-apps only)
+  - other-mfe-id                                  # ID of a microfrontend embedded via Module Federation / iframe
 ```
 
 Supported protocol values: `http`, `rabbitmq`, `socket`, `websocket`, `grpc`, `graphql` (defined in `tooling/schemas/protocols.schema.json`).
 Each asyncapi transport is a separate entry — one file per transport, no merging.
 
 For `type: website` and `type: library`, `contracts` is optional — the component is registered in the catalog without contract files.
+
+The `embeds` field is for shell-apps that compose other microfrontends (Module Federation, iframe). It creates a dashed edge in the dependency graph.
 
 ### Module folder structure
 
