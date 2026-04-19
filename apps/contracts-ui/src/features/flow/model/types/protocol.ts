@@ -1,1 +1,1 @@
-export type Protocol = "http" | "socket";
+export type Protocol = "http" | "rabbitmq" | "socket" | "websocket" | "grpc" | "graphql";

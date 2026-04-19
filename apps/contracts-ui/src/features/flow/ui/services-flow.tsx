@@ -5,7 +5,6 @@ import {
   Background,
   DefaultEdgeOptions,
   FitViewOptions,
-  MarkerType,
   NodeTypes,
   ReactFlow,
 } from "@xyflow/react";
@@ -32,9 +31,6 @@ const fitViewOptions: FitViewOptions = {
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
   animated: true,
-  markerEnd: {
-    type: MarkerType.ArrowClosed,
-  },
 };
 
 export const ServiceFlowViewer = () => {

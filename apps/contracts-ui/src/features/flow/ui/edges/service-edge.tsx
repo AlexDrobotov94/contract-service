@@ -19,6 +19,7 @@ export const ServiceEdgeComponent = memo(
     targetY,
     sourcePosition,
     targetPosition,
+    markerStart,
     markerEnd,
     selected,
   }: EdgeProps<ServiceEdge>) => {
@@ -41,6 +42,7 @@ export const ServiceEdgeComponent = memo(
         <BaseEdge
           id={id}
           path={edgePath}
+          markerStart={markerStart}
           markerEnd={markerEnd}
           style={{
             strokeWidth: selected ? 2 : 1.5,

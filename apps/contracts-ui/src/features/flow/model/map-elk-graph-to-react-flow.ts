@@ -1,4 +1,5 @@
 import type { ElkExtendedEdge, ElkNode } from "elkjs/lib/elk-api";
+import { MarkerType } from "@xyflow/react";
 
 import type {
   GraphNode,
@@ -7,6 +8,8 @@ import type {
   ServiceFlowNode,
   ServiceGraph,
 } from "./types";
+import type { Protocol } from "./types/protocol";
+import { PROTOCOL_EDGE_DIRECTION } from "./constants";
 
 function extractNodeLabel(node: ElkNode): string {
   return node.labels?.[0]?.text ?? node.id;
@@ -61,7 +64,9 @@ function mapElkEdgeToReactFlowEdge(edge: ElkExtendedEdge): ServiceEdge {
     throw new Error(`У ребра "${edge.id}" отсутствует source или target port`);
   }
 
-  const protocol = edge.labels?.[0]?.text === "socket" ? "socket" : "http";
+  const protocol = (edge.labels?.[0]?.text ?? "http") as Protocol;
+  const direction = PROTOCOL_EDGE_DIRECTION[protocol];
+  const marker = { type: MarkerType.ArrowClosed };
 
   return {
     id: edge.id,
@@ -71,6 +76,8 @@ function mapElkEdgeToReactFlowEdge(edge: ElkExtendedEdge): ServiceEdge {
     targetHandle: extractHandleIdFromPortId(targetPortId),
     type: "service-edge",
     data: { protocol },
+    markerEnd: direction !== "backward" ? marker : undefined,
+    markerStart: direction !== "forward" ? marker : undefined,
   };
 }
 
