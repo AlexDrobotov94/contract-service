@@ -53,7 +53,8 @@
       "WebFetch(domain:reactflow.dev)",
       "Bash(cp -r \"C:/Users/Alex24/.claude/plugins/user-local/skills/context7-mcp\" \"D:/kvint-for-contracts/contract-service/.claude/skills/\")",
       "Bash(cp -r \"C:/Users/Alex24/.claude/plugins/user-local/skills/elkjs-reference\" \"D:/kvint-for-contracts/contract-service/.claude/skills/\")",
-      "Bash(cp -r \"C:/Users/Alex24/.claude/plugins/user-local/skills/react-flow-reference\" \"D:/kvint-for-contracts/contract-service/.claude/skills/\")"
+      "Bash(cp -r \"C:/Users/Alex24/.claude/plugins/user-local/skills/react-flow-reference\" \"D:/kvint-for-contracts/contract-service/.claude/skills/\")",
+      "WebFetch(domain:backstage.io)"
     ]
   }
 }

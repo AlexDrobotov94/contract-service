@@ -169,25 +169,27 @@ description: >
 
 После каждой: «Добавить ещё ссылку? (да/нет)»
 
-### dependsOn
+### consumesApis
 
-«Указать зависимости от других сервисов? (да/нет)»
+«Указать API других сервисов, которые потребляет этот сервис? (да/нет)»
 
 Если да — покажи список зарегистрированных serviceRef из `services.schema.json#/definitions/serviceRef/enum`.
 
-Для каждой зависимости:
+Для каждой записи:
 
 1. **Сервис** — выбор из списка (или ввод вручную если нужного нет)
-2. **Тип связи**:
+2. **Протокол**:
    ```
-   1. http   (синхронный вызов)
-   2. event  (асинхронный, событие)
-   3. queue  (асинхронный, очередь)
-   4. socket (WebSocket)
+   1. http      (REST/OpenAPI)
+   2. rabbitmq  (RabbitMQ/AMQP)
+   3. socket    (Socket.IO)
+   4. websocket (нативный WebSocket)
+   5. grpc      (gRPC)
+   6. graphql   (GraphQL)
    ```
-3. **Описание** — зачем нужен этот сервис
+3. **Описание** — зачем нужен этот API
 
-После каждой: «Добавить ещё зависимость? (да/нет)»
+После каждой: «Добавить ещё запись? (да/нет)»
 
 ---
 
@@ -210,8 +212,8 @@ description: >
 - `tags` — `[]`
 - `source` — не включай блок в файл
 - `links` — `[]`
-- `contracts` — `[]` (записи добавляются автоматически агентами-генераторами)
-- `dependsOn` — `[]`
+- `providesApis` — `[]` (записи добавляются автоматически агентами-генераторами)
+- `consumesApis` — `[]`
 
 **Структура файла** (порядок полей строго такой):
 
@@ -243,16 +245,16 @@ links:
     title: { title }
     icon: { icon }
 
-contracts: []
+providesApis: []
 
-dependsOn:
+consumesApis:
   - service: { serviceRef }
-    type: { type }
+    protocol: { protocol }
     description: "{description}"
 ```
 
 Блок `description:` пиши только если пользователь его заполнил.
-`tags: []`, `links: []`, `dependsOn: []` — если пустые.
+`tags: []`, `links: []`, `providesApis: []`, `consumesApis: []` — если пустые.
 `source` — только если был указан.
 Иконку в links — только если была выбрана.
 

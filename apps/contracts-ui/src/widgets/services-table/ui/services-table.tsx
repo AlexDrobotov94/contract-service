@@ -52,15 +52,15 @@ const columns = [
   columnHelper.accessor("domain", {
     header: "Domain",
   }),
-  columnHelper.accessor("contracts", {
+  columnHelper.accessor("providesApis", {
     header: "Контракты",
     enableSorting: false,
     cell: ({ getValue }) => {
-      const contracts = getValue();
-      if (!contracts?.length) return <span className="text-muted-foreground">—</span>;
+      const apis = getValue();
+      if (!apis?.length) return <span className="text-muted-foreground">—</span>;
       return (
         <div className="flex flex-wrap gap-1">
-          {contracts.map((c) => (
+          {apis.map((c) => (
             <ProtocolBadge key={c.protocol} protocol={c.protocol} />
           ))}
         </div>

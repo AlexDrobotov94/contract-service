@@ -62,7 +62,7 @@ links:                                            # optional arbitrary links
   - url: https://grafana.kvint.io/d/<id>
     title: Grafana
     icon: alert  # alert | support | website
-contracts:                                        # optional — omit for type: website / library
+providesApis:                                     # optional — omit for type: website / library
   - protocol: http
     path: openapi/openapi.yaml
   - protocol: socket
@@ -71,9 +71,13 @@ contracts:                                        # optional — omit for type: 
     path: asyncapi/websocket.yaml
   - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
+consumesApis:                                     # optional — APIs this service consumes from other services
+  - service: other-service                        # must be registered in services.schema.json
+    protocol: http                                # must match a protocol in that service's providesApis
+    description: "Why this API is needed"
 ```
 
-Supported protocol values: `http`, `rabbitmq`, `socket`, `websocket`, `grpc`, `graphql`.
+Supported protocol values: `http`, `rabbitmq`, `socket`, `websocket`, `grpc`, `graphql` (defined in `tooling/schemas/protocols.schema.json`).
 Each asyncapi transport is a separate entry — one file per transport, no merging.
 
 For `type: website` and `type: library`, `contracts` is optional — the component is registered in the catalog without contract files.

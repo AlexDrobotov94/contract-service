@@ -42,17 +42,17 @@ links:
     title: Grafana
     icon: alert
 
-contracts:
+providesApis:
   - protocol: http
     path: openapi/openapi.yaml
   - protocol: socket
     path: asyncapi/socket.yaml
-  - protocol: queue
+  - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
 
-dependsOn:
-  - service: component:default/user-service
-    type: http
+consumesApis:
+  - service: user-service
+    protocol: http
 ```
 
 ---
@@ -62,17 +62,17 @@ dependsOn:
 **`apiVersion`** — версия формата дескриптора. Позволяет порталу
 выбрать правильный парсер при эволюции схемы. Текущая: `kvint/v1`.
 
-**`contracts[]`** — явный список протоколов с путями к файлам.
+**`providesApis[]`** — API, которые предоставляет этот сервис. Явный список протоколов с путями к файлам.
 Портал не угадывает где лежат файлы — берёт из этого поля.
 Определяет какие вкладки показывать на странице сервиса.
-Каждый asyncapi-транспорт — отдельная запись: `queue` для RabbitMQ, `socket` для Socket.IO.
+Каждый asyncapi-транспорт — отдельная запись: `rabbitmq` для RabbitMQ, `socket` для Socket.IO.
 
-**`dependsOn[]`** — явные зависимости от других сервисов.
-Используются для построения графа сервисов.
+**`consumesApis[]`** — API других сервисов, которые потребляет этот сервис.
+Симметрично `providesApis`. Используются для построения двунаправленного графа зависимостей.
+Поле `protocol` должно совпадать с `protocol` в `providesApis` целевого сервиса.
 
-**Entity reference format** — ссылки на сущности в формате
-`<kind>:<namespace>/<id>` (например `component:default/user-service`).
-Заимствовано из Backstage для однозначной идентификации.
+**Service reference format** — ссылки на сервисы по их `serviceId` (например `user-service`).
+Реестр всех допустимых ID: `tooling/schemas/services.schema.json`.
 
 ---
 
@@ -87,7 +87,7 @@ tooling/schemas/
 `services.schema.json` — единственное место где регистрируется новый сервис.
 `service.schema.json` ссылается на него через `$ref`.
 
-Это даёт автокомплит для полей `id` и `dependsOn.service` в редакторе.
+Это даёт автокомплит для полей `id` и `consumesApis.service` в редакторе.
 
 **Правило:** новый сервис → сначала добавить ID в `services.schema.json`,
 потом создавать пакет контрактов.
@@ -102,7 +102,7 @@ tooling/schemas/
 Отличия от Backstage:
 
 - Нет разделения `metadata` / `spec` — плоская структура проще
-- `contracts[]` вместо `providesApis` / `consumesApis` — API не отдельный kind сущности
+- `providesApis[]` / `consumesApis[]` вместо Backstage API entity kind — нет отдельной сущности API
 - `apiVersion` без домена (`kvint/v1` вместо `backstage.io/v1alpha1`)
 - Нет `labels`, `annotations` — добавим когда появится реальная потребность
 

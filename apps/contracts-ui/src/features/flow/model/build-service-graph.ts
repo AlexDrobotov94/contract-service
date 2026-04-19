@@ -37,7 +37,7 @@ function buildNodePorts(service: ServiceNode): GraphPort[] {
   }
 
   const outgoingProtocols = new Set<Protocol>(
-    service.dependsOn.map((dependency) => dependency.protocol),
+    service.consumesApis.map((dependency) => dependency.protocol),
   );
 
   for (const protocol of outgoingProtocols) {
@@ -73,7 +73,7 @@ function buildGraphEdges(services: ServiceNode[]): GraphEdge[] {
   const edges: GraphEdge[] = [];
 
   for (const service of services) {
-    for (const dependency of service.dependsOn) {
+    for (const dependency of service.consumesApis) {
       edges.push({
         id: buildEdgeId(service.id, dependency.protocol, dependency.serviceId),
         sourceNodeId: service.id,
@@ -103,7 +103,7 @@ function validateUniqueServiceIds(services: ServiceNode[]): void {
 function validateUniqueDependencies(service: ServiceNode): void {
   const seen = new Set<string>();
 
-  for (const dependency of service.dependsOn) {
+  for (const dependency of service.consumesApis) {
     const key = `${dependency.serviceId}:${dependency.protocol}`;
 
     if (seen.has(key)) {
@@ -150,7 +150,7 @@ function validateGraph(services: ServiceNode[]): void {
   for (const service of services) {
     validateUniqueDependencies(service);
 
-    for (const dependency of service.dependsOn) {
+    for (const dependency of service.consumesApis) {
       const targetService = servicesById.get(dependency.serviceId);
 
       validateDependencyTargetExists(

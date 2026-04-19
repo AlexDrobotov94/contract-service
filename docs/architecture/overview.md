@@ -49,7 +49,7 @@ tooling/                  ← скрипты и схемы
 packages/chat-module/
   package.json              ← "contracts": true, @kvint/chat-module
   metadata/
-    service.yaml            ← метаданные: owner, lifecycle, dependsOn и т.д.
+    service.yaml            ← метаданные: owner, lifecycle, consumesApis и т.д.
   openapi/
     openapi.yaml
   asyncapi/

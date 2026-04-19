@@ -74,11 +74,11 @@ export interface ServiceDescriptor {
     icon?: 'alert' | 'support' | 'website';
   }[];
   /**
-   * Список контрактных файлов сервиса. Определяет какие вкладки показывать в портале.
+   * API, которые предоставляет этот сервис. Определяет какие вкладки показывать в портале.
    */
-  contracts?: {
+  providesApis?: {
     /**
-     * Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
+     * Протокол API. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
      */
     protocol: 'http' | 'rabbitmq' | 'socket' | 'websocket' | 'grpc' | 'graphql';
     /**
@@ -91,16 +91,16 @@ export interface ServiceDescriptor {
     description?: string;
   }[];
   /**
-   * Явные зависимости от других сервисов.
+   * API других сервисов, которые потребляет этот сервис. Симметрично полю providesApis.
    */
-  dependsOn?: {
+  consumesApis?: {
     service: 'chat-service' | 'dialer-service';
     /**
-     * Тип зависимости: http — синхронный вызов, event/queue — асинхронный, socket — WebSocket.
+     * Протокол API. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL.
      */
-    type: 'http' | 'event' | 'queue' | 'socket';
+    protocol: 'http' | 'rabbitmq' | 'socket' | 'websocket' | 'grpc' | 'graphql';
     /**
-     * Зачем этот сервис нужен — контекст для карты зависимостей.
+     * Зачем этот API нужен — контекст для карты зависимостей.
      */
     description?: string;
   }[];

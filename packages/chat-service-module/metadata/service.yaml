@@ -22,7 +22,7 @@ source: https://gitlab.prod.kvint.io/kvint/web/chat-service
 
 links: []
 
-contracts:
+providesApis:
   - protocol: http
     path: openapi/openapi.yaml
   - protocol: socket
@@ -30,4 +30,4 @@ contracts:
   - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
 
-dependsOn: []
+consumesApis: []

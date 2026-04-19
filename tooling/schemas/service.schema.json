@@ -127,18 +127,16 @@
       }
     },
 
-    "contracts": {
+    "providesApis": {
       "type": "array",
-      "description": "Список контрактных файлов сервиса. Определяет какие вкладки показывать в портале.",
+      "description": "API, которые предоставляет этот сервис. Определяет какие вкладки показывать в портале.",
       "items": {
         "type": "object",
         "required": ["protocol", "path"],
         "additionalProperties": false,
         "properties": {
           "protocol": {
-            "type": "string",
-            "enum": ["http", "rabbitmq", "socket", "websocket", "grpc", "graphql"],
-            "description": "Тип протокола. Определяет UI-компонент для рендеринга. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL."
+            "$ref": "protocols.schema.json#/definitions/protocol"
           },
           "path": {
             "type": "string",
@@ -152,25 +150,23 @@
       }
     },
 
-    "dependsOn": {
+    "consumesApis": {
       "type": "array",
-      "description": "Явные зависимости от других сервисов.",
+      "description": "API других сервисов, которые потребляет этот сервис. Симметрично полю providesApis.",
       "items": {
         "type": "object",
-        "required": ["service", "type"],
+        "required": ["service", "protocol"],
         "additionalProperties": false,
         "properties": {
           "service": {
             "$ref": "services.schema.json#/definitions/serviceRef"
           },
-          "type": {
-            "type": "string",
-            "enum": ["http", "event", "queue", "socket"],
-            "description": "Тип зависимости: http — синхронный вызов, event/queue — асинхронный, socket — WebSocket."
+          "protocol": {
+            "$ref": "protocols.schema.json#/definitions/protocol"
           },
           "description": {
             "type": "string",
-            "description": "Зачем этот сервис нужен — контекст для карты зависимостей."
+            "description": "Зачем этот API нужен — контекст для карты зависимостей."
           }
         }
       }

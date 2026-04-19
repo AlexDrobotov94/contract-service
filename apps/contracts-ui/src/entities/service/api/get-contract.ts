@@ -8,7 +8,7 @@ export function getContractContent(
   service: ServiceMeta,
   protocol: ServiceProtocol,
 ): string | null {
-  const contract = service.contracts?.find((c) => c.protocol === protocol);
+  const contract = service.providesApis?.find((c) => c.protocol === protocol);
   if (!contract) return null;
 
   const filePath = path.join(service._packageDir, contract.path);

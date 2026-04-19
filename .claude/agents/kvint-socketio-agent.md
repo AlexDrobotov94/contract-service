@@ -194,7 +194,7 @@ components:
 
 2. After successful write, update `packages/<package-name>/metadata/service.yaml`:
    - Read the file
-   - If `contracts` key is missing or null → treat as empty array
+   - If `providesApis` key is missing or null → treat as empty array
    - Check if an entry with `protocol: socket` already exists
    - If not → append:
      ```yaml

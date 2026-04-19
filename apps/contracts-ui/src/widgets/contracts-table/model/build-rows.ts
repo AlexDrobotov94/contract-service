@@ -11,7 +11,7 @@ export function buildRows(services: ServiceMeta[], qualityMap: QualityMap = {}):
       owner: service.owner,
     };
 
-    const contracts = service.contracts ?? [];
+    const contracts = service.providesApis ?? [];
 
     if (contracts.length === 1) {
       const protocol = contracts[0].protocol;

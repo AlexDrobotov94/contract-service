@@ -20,10 +20,10 @@ source: https://gitlab.prod.kvint.io/kvint-core/kvint-dialer-go
 
 links: []
 
-contracts:
+providesApis:
   - protocol: rabbitmq
     path: asyncapi/rabbitmq.yaml
   - protocol: websocket
     path: asyncapi/websocket.yaml
 
-dependsOn: []
+consumesApis: []

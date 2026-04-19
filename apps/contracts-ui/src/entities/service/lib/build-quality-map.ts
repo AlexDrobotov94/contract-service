@@ -17,7 +17,7 @@ export function buildQualityMap(services: ServiceMeta[]): QualityMap {
   const map: QualityMap = {};
 
   for (const service of services) {
-    for (const contract of service.contracts ?? []) {
+    for (const contract of service.providesApis ?? []) {
       const protocol = contract.protocol as ServiceProtocol;
       const content = getContractContent(service, protocol);
       if (!content) continue;

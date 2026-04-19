@@ -332,7 +332,7 @@ After successfully writing `packages/{packageName}/openapi/openapi.yaml`, update
 
 1. Read `packages/{packageName}/metadata/service.yaml`
 2. Parse the YAML
-3. If `contracts` key is missing or null → treat it as an empty array
+3. If `providesApis` key is missing or null → treat it as an empty array
 4. Check if an entry with `protocol: http` already exists in the array
 5. If it does **not** exist → append:
    ```yaml

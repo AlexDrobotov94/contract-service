@@ -9,5 +9,5 @@ export type ServiceNode = {
   id: string;
   name: string;
   provides: Protocol[];
-  dependsOn: ServiceDependency[];
+  consumesApis: ServiceDependency[];
 };

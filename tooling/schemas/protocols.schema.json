@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "protocols.schema.json",
+  "title": "API Protocols",
+  "description": "Реестр поддерживаемых протоколов API. Используется в providesApis и consumesApis.",
+
+  "definitions": {
+    "protocol": {
+      "type": "string",
+      "enum": ["http", "rabbitmq", "socket", "websocket", "grpc", "graphql"],
+      "description": "Протокол API. http — REST/OpenAPI (Scalar). rabbitmq — RabbitMQ/AMQP (AsyncAPI viewer). socket — Socket.IO (AsyncAPI viewer). websocket — нативный WebSocket (ws library, AsyncAPI viewer). grpc — gRPC. graphql — GraphQL."
+    }
+  }
+}

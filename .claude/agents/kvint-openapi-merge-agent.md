@@ -22,9 +22,9 @@ This project is the `contract-service` monorepo using Feature-Sliced Design. Con
 - `metadata/service.yaml` following the Kvint v1 schema
 - OpenAPI specs typically at `openapi/openapi.yaml`
 
-Service metadata references contracts like:
+Service metadata references provided APIs like:
 ```yaml
-contracts:
+providesApis:
   - protocol: http
     path: openapi/openapi.yaml
 ```
@@ -126,7 +126,7 @@ After successfully writing the merged `packages/<service-name>/openapi/openapi.y
 
 1. Read `packages/<service-name>/metadata/service.yaml`
 2. Parse the YAML
-3. If `contracts` key is missing or null → treat it as an empty array
+3. If `providesApis` key is missing or null → treat it as an empty array
 4. Check if an entry with `protocol: http` already exists in the array
 5. If it does **not** exist → append:
    ```yaml
